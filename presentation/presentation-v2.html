@@ -804,7 +804,7 @@ svg text{transition:fill .4s}
       <div class="qrcol" data-rv>
         <div class="qrframe">
           <i class="cb"></i><i class="cb"></i><i class="cb"></i><i class="cb"></i>
-          <div id="qrbox"></div>
+          <div id="qrbox"><img src="../assets/qr-code.png" alt="QR code linking to linkedin.com/in/ashishpatel2604" style="width:100%;height:100%;display:block;object-fit:contain;background:var(--panel)"></div>
         </div>
         <div class="qr-lbl">scan ▸ <b>connect on LinkedIn</b><br>linkedin.com/in/ashishpatel2604</div>
       </div>
@@ -1251,36 +1251,9 @@ setTimeout(()=>$('#hint').classList.add('bye'),8000);
 
 /* ============================================================
    slide 10 · QR → LinkedIn profile
-   (v2: fallback shows a plain readable URL instead of a
-   fake-looking dot pattern, so a CDN failure at the venue
-   never presents as a broken-but-real-looking QR code)
+   (v2: a static, pre-verified PNG — decodes to
+   https://www.linkedin.com/in/ashishpatel2604 — instead of a
+   JS-generated code, so there's no CDN/library dependency at
+   the venue)
 ============================================================ */
-(function(){
-  const QR_URL='https://www.linkedin.com/in/ashishpatel2604/';
-  const box=$('#qrbox');
-  function fallback(){
-    box.innerHTML = `<div class="qr-fallback-url">QR unavailable offline —<br><b>linkedin.com/in/ashishpatel2604</b></div>`;
-  }
-  function init(){
-    if(!window.qrcode){ fallback(); return; }
-    try{
-      const q=qrcode(0,'M'); q.addData(QR_URL); q.make();
-      box.innerHTML=q.createSvgTag(3,0);
-      const svg=box.firstElementChild;
-      const w=+svg.getAttribute('width')||63, h=+svg.getAttribute('height')||63;
-      svg.setAttribute('viewBox',`0 0 ${w} ${h}`);
-      svg.removeAttribute('width'); svg.removeAttribute('height');
-      svg.style.background = 'var(--panel)';
-      /* first rect is the qrcode library's own background square — keep it
-         panel-colored (not ink) or it paints the same color as the modules
-         and the whole code disappears into one solid block. */
-      const kids = [...svg.children];
-      kids.forEach((p,i)=>{
-        if(i===0 && p.tagName==='rect'){ p.setAttribute('fill','var(--panel)'); return; }
-        p.setAttribute('fill','var(--ink)'); p.removeAttribute('stroke');
-      });
-    }catch(e){ fallback(); }
-  }
-  document.readyState==='loading' ? addEventListener('DOMContentLoaded',init) : init();
-})();
 </script></body></html>
