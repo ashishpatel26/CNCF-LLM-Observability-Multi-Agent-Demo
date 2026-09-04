@@ -1,0 +1,1286 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Use Observability: The Critical Importance of LLM Observability in Enterprise AI Agents · Ashish Patel · CND Gandhinagar 2026</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet"><script defer src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script><style>
+/* ============ tokens — DARK (default) ============ */
+:root{
+  --bg:#0A0C11; --bg2:#0D1017; --panel:#0F131C; --panel2:#131826;
+  --line:#1D2331; --line2:#2A3244;
+  --ink:#E9EDF5; --dim:#98A2B6; --faint:#707C92;
+  --indigo:#6D5CFF; --indigo-t:#9588FF; --indigo-d:rgba(109,92,255,.12);
+  --teal:#12E5B4; --teal-t:#3BECC1; --teal-d:rgba(18,229,180,.09);
+  --coral:#FF5C7A; --coral-t:#FF7E95; --coral-d:rgba(255,92,122,.09);
+  --amber:#F5B455; --amber-d:rgba(245,180,85,.1);
+  --stagebg:#05070B; --gridln:rgba(146,160,190,.05); --noise-op:.05;
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --sans:'Space Grotesk',sans-serif;
+}
+/* ============ tokens — LIGHT (data-theme="light" on #stage) ============ */
+#stage[data-theme="light"]{
+  --bg:#F7F8FA; --bg2:#FFFFFF; --panel:#FFFFFF; --panel2:#F0F2F6;
+  --line:#DEE3EC; --line2:#C7CEDC;
+  --ink:#12151C; --dim:#4B5568; --faint:#7A8496;
+  --indigo:#5A47E8; --indigo-t:#4433C9; --indigo-d:rgba(90,71,232,.08);
+  --teal:#0B9E7C; --teal-t:#087F63; --teal-d:rgba(11,158,124,.08);
+  --coral:#E0405C; --coral-t:#C22F49; --coral-d:rgba(224,64,92,.08);
+  --amber:#B9791A; --amber-d:rgba(185,121,26,.08);
+  --stagebg:#EDEFF3; --gridln:rgba(20,30,60,.06); --noise-op:.02;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;background:#05070B}
+body{font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased}
+::selection{background:rgba(109,92,255,.4)}
+button{font-family:inherit;color:inherit;background:none;border:none;cursor:pointer}
+:focus-visible{outline:1px solid var(--indigo-t);outline-offset:2px}
+/* ============ stage (fixed 1280×720, scaled to viewport) ============ */
+#stage{position:absolute;top:50%;left:50%;width:1280px;height:720px;background:var(--bg);
+  transform-origin:center center;display:flex;flex-direction:column;overflow:hidden;transition:background .3s}
+#stage::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:60;
+  background:radial-gradient(1100px 480px at 78% -6%,rgba(109,92,255,.06),transparent 60%),
+             radial-gradient(900px 420px at 4% 106%,rgba(18,229,180,.045),transparent 60%)}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;opacity:var(--noise-op);z-index:1000;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E")}
+body{background:var(--stagebg)}
+/* ============ chrome ============ */
+#chromeTop{height:40px;flex:none;display:flex;align-items:center;justify-content:space-between;
+  padding:0 22px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:10px;color:var(--faint);z-index:50;background:var(--bg)}
+#chromeTop .ct-l{display:flex;align-items:center;gap:10px}
+#chromeTop .ct-l b{color:var(--indigo-t);font-weight:500}
+#chromeBot{height:52px;flex:none;display:flex;align-items:center;gap:18px;padding:0 22px;
+  border-top:1px solid var(--line);font-family:var(--mono);z-index:50;background:var(--bg)}
+#spanLabel{font-size:9.5px;color:var(--faint);width:250px;flex:none}
+#spanLabel b{color:var(--indigo-t);font-weight:500}
+#wfProg{position:relative;flex:1;height:26px}
+#wfProg .seg{position:absolute;top:9px;height:8px;background:var(--line);border-radius:1px;cursor:pointer;transition:background .3s}
+#wfProg .seg:hover{background:var(--line2)}
+#wfProg .seg.past{background:rgba(18,229,180,.55)}
+#wfProg .seg.cur{background:var(--indigo);box-shadow:0 0 0 1px rgba(109,92,255,.35)}
+#wfProg .seg-name{position:absolute;top:-7px;font-size:8.5px;color:var(--indigo-t);white-space:nowrap;transform:translateX(-50%);letter-spacing:.08em}
+#navBtns{display:flex;gap:8px;align-items:center;flex:none}
+#navBtns .nb{width:28px;height:28px;border:1px solid var(--line2);border-radius:3px;display:grid;place-items:center;transition:border-color .2s,background .2s}
+#navBtns .nb:hover{border-color:var(--indigo);background:var(--indigo-d)}
+#navBtns .nb svg{stroke:var(--dim)}
+#navBtns .hint-k{font-size:9px;color:var(--faint);margin-left:6px;letter-spacing:.05em}
+#clock{color:var(--dim)}
+#themeBtn{width:28px;height:28px;border:1px solid var(--line2);border-radius:3px;display:grid;place-items:center;transition:.2s;margin-right:4px}
+#themeBtn:hover{border-color:var(--indigo);background:var(--indigo-d)}
+#themeBtn svg{stroke:var(--dim)}
+/* ============ deck & slides ============ */
+#deck{position:relative;flex:1;
+  background-image:linear-gradient(var(--gridln) 1px,transparent 1px),
+                   linear-gradient(90deg,var(--gridln) 1px,transparent 1px);
+  background-size:64px 64px}
+.slide{position:absolute;inset:0;padding:30px 52px 16px;display:flex;flex-direction:column;
+  opacity:0;visibility:hidden;transform:translateX(28px);
+  transition:opacity .45s ease,transform .45s cubic-bezier(.16,.84,.3,1),visibility 0s .45s}
+.slide.out{opacity:0;transform:translateX(-28px)}
+.slide.on{opacity:1;visibility:visible;transform:none;transition-delay:0s}
+[data-rv]{opacity:0;transform:translateY(13px);transition:opacity .4s ease,transform .4s ease}
+.slide.on [data-rv]{opacity:1;transform:none;transition-delay:calc(var(--i,0)*70ms + 140ms)}
+.shead{margin-bottom:14px;flex:none}
+.kicker{display:flex;align-items:center;gap:12px;font-family:var(--mono);font-size:10.5px;
+  letter-spacing:.18em;color:var(--dim);text-transform:uppercase;margin-bottom:8px}
+.kicker .k-num{color:var(--indigo-t);font-weight:700}
+.kicker::after{content:"";flex:1;height:1px;background:var(--line)}
+.stitle{font-size:32px;font-weight:700;letter-spacing:-.015em;line-height:1.06}
+.core{margin-top:12px;flex:none;border-top:1px solid var(--line);padding-top:9px;
+  font-family:var(--mono);font-size:10.5px;color:var(--dim);display:flex;gap:10px;align-items:baseline}
+.core b{color:var(--teal);font-weight:500;flex:none}
+.body{flex:1;min-height:0;position:relative;display:flex;flex-direction:column}
+/* generic */
+.pnl{background:var(--panel);border:1px solid var(--line);border-radius:6px;display:flex;flex-direction:column;min-height:0}
+.pnl-h{display:flex;align-items:center;justify-content:space-between;flex:none;padding:9px 14px;
+  border-bottom:1px solid var(--line);font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--faint);text-transform:uppercase}
+.pnl-h .dot{width:6px;height:6px;border-radius:50%;background:var(--teal);margin-right:8px;display:inline-block;vertical-align:1px}
+.pnl-h b{color:var(--indigo-t);font-weight:500}
+.chip{display:inline-block;font-family:var(--mono);font-size:10px;color:var(--dim);
+  border:1px solid var(--line2);border-radius:3px;padding:3px 9px;background:var(--panel2)}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}}
+@keyframes dashf{to{stroke-dashoffset:-11}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes blink{50%{opacity:0}}
+/* ============ master diagram (shared visual language) ============ */
+svg text{font-family:var(--mono)}
+.mst{position:relative;min-width:0}
+.mst svg{width:100%;height:100%;display:block}
+[data-s],[data-mg]{transition:opacity .5s}
+.m-off{opacity:0}
+.m-dim{opacity:.2}
+.m-ln{stroke:#39435A;stroke-width:1.2;fill:none}
+#stage[data-theme="light"] .m-ln{stroke:#B6BECF}
+.m-ln.ln-i{stroke:rgba(109,92,255,.7)}
+.m-ln.ln-t{stroke:rgba(18,229,180,.6)}
+.m-ln.ln-e{stroke:rgba(255,92,122,.75)}
+.m-dash{stroke-dasharray:5 6;animation:dashf 1.4s linear infinite}
+.mnd rect,.mbx>rect,.mbx2r,.mbxcr{transition:stroke .4s,fill .4s}
+svg text{transition:fill .4s}
+.mn-d rect{fill:#0F1420;stroke:#33405C}
+.mn-d text{fill:#A9B4C6}
+.mn-i rect{fill:#11131F;stroke:rgba(109,92,255,.75)}
+.mn-i text{fill:#B7B0F0}
+.mn-t rect{fill:#0E1519;stroke:rgba(18,229,180,.55)}
+.mn-t text{fill:#7FE9CC}
+.mn-e rect{fill:#151019;stroke:rgba(255,92,122,.6)}
+.mn-e text{fill:#F0A9B8}
+#stage[data-theme="light"] .mn-d rect{fill:#FFFFFF;stroke:#C7CEDC}
+#stage[data-theme="light"] .mn-d text{fill:#3A4256}
+#stage[data-theme="light"] .mn-i rect{fill:#F1EEFF;stroke:#8C7BFF}
+#stage[data-theme="light"] .mn-i text{fill:#4433C9}
+#stage[data-theme="light"] .mn-t rect{fill:#EAFBF6;stroke:#3FCBA6}
+#stage[data-theme="light"] .mn-t text{fill:#087F63}
+#stage[data-theme="light"] .mn-e rect{fill:#FDECEF;stroke:#E88DA0}
+#stage[data-theme="light"] .mn-e text{fill:#C22F49}
+.mbx>rect{fill:rgba(109,92,255,.07);stroke:rgba(109,92,255,.6)}
+.mbx2r{fill:rgba(109,92,255,.05);stroke:rgba(109,92,255,.5)}
+.mbxcr{fill:rgba(18,229,180,.06);stroke:rgba(18,229,180,.55)}
+.m-tf{fill:#707C92}
+.m-ti{fill:#9588FF}
+.m-tt{fill:#3BECC1}
+.m-te{fill:#FF7E95}
+.m-td{fill:#98A2B6}
+#stage[data-theme="light"] .m-tf{fill:#7A8496}
+#stage[data-theme="light"] .m-ti{fill:#4433C9}
+#stage[data-theme="light"] .m-tt{fill:#087F63}
+#stage[data-theme="light"] .m-te{fill:#C22F49}
+#stage[data-theme="light"] .m-td{fill:#4B5568}
+.m-sep{stroke:#232B3D;stroke-dasharray:3 7}
+.m-lblbg{fill:#0A0C11;stroke:#232B3D}
+#stage[data-theme="light"] .m-lblbg{fill:#F7F8FA;stroke:#DEE3EC}
+.seg-root{fill:none;stroke:rgba(109,92,255,.8)}
+.seg-i{fill:#6D5CFF}
+.seg-t{fill:rgba(18,229,180,.85)}
+.seg-a{fill:#F5B455}
+.seg-e{fill:#FF5C7A}
+.mchip{fill:#131826;stroke:#2A3244}
+.mchip-e{stroke:rgba(255,92,122,.6);fill:rgba(255,92,122,.08)}
+.mchip-t{stroke:rgba(18,229,180,.55);fill:rgba(18,229,180,.07)}
+#stage[data-theme="light"] .mchip{fill:#F0F2F6;stroke:#C7CEDC}
+.mcx-d{fill:#98A2B6}
+.mcx-e{fill:#FF7E95}
+.mcx-t{fill:#3BECC1}
+#stage[data-theme="light"] .mcx-d{fill:#4B5568}
+#stage[data-theme="light"] .mcx-e{fill:#C22F49}
+#stage[data-theme="light"] .mcx-t{fill:#087F63}
+.ovl-e{fill:rgba(255,92,122,.1);stroke:rgba(255,92,122,.55)}
+.zn{fill:none;stroke-dasharray:6 5}
+.zn-t{stroke:rgba(18,229,180,.6)}
+.zn-i{stroke:rgba(109,92,255,.6)}
+.zn-a{stroke:rgba(245,180,85,.6)}
+.zn-e{stroke:rgba(255,92,122,.6)}
+/* live state classes (slide 4 failure propagation) */
+.k-err rect{stroke:#FF5C7A;fill:rgba(255,92,122,.16)} .k-err text{fill:#FF7E95}
+.k-hl rect{stroke:#6D5CFF;fill:rgba(109,92,255,.14)} .k-hl text{fill:#9588FF}
+.k-warn rect{stroke:#F5B455;fill:rgba(245,180,85,.12)} .k-warn text{fill:#F5B455}
+.k-ok rect{stroke:#12E5B4;fill:rgba(18,229,180,.12)} .k-ok text{fill:#12E5B4}
+/* ============ SLIDE 00 · title / root span ============ */
+.sT-grid{flex:1;min-height:0;display:grid;grid-template-columns:1fr 400px;gap:34px;align-items:center}
+.sT-left{display:flex;flex-direction:column;justify-content:center}
+.sT-title{font-size:38px;line-height:1.12;font-weight:700;letter-spacing:-.015em;margin:18px 0 10px}
+.sT-title .hollow{color:transparent;-webkit-text-stroke:1.5px var(--indigo-t)}
+.sT-sub{font-size:17px;font-style:italic;color:var(--dim)}
+.sT-speaker{display:flex;gap:16px;align-items:center;margin-top:34px;padding:18px 0 16px;border-top:1px solid var(--line)}
+.sT-ava{width:56px;height:56px;flex:none;border:1px solid var(--line2);border-radius:5px;display:grid;place-items:center;
+  font-family:var(--mono);font-size:18px;font-weight:700;color:var(--indigo-t);background:var(--panel2)}
+.sT-name{font-size:22px;font-weight:700;letter-spacing:-.01em}
+.sT-role{font-family:var(--mono);font-size:11px;color:var(--faint);margin-top:5px;letter-spacing:.04em}
+.sT-role b{color:var(--teal-t);font-weight:500}
+.sT-meta{font-family:var(--mono);font-size:10px;color:var(--faint);margin-top:12px;letter-spacing:.1em;text-transform:uppercase}
+.sT-right{display:flex;flex-direction:column;gap:14px}
+.sT-boot{padding:13px 16px;font-family:var(--mono);font-size:11px;line-height:2.05;min-height:212px;color:var(--dim)}
+.bl{white-space:pre-wrap;animation:rise .25s ease}
+.bl .cm{color:var(--ink)}
+.bl.ok{color:var(--teal-t)}
+.bl.dimc{color:var(--faint)}
+.bl.hl{color:var(--indigo-t)}
+.tcur{display:inline-block;width:7px;height:13px;background:var(--teal);vertical-align:-2px;margin-left:2px;animation:blink 1.1s steps(1) infinite}
+.sT-prev .pt-wrap{padding:15px 16px 13px}
+.pt-root{height:7px;border:1px solid var(--indigo);border-radius:2px;margin-bottom:11px;position:relative}
+.pt-root::after{content:'root · session.start';position:absolute;left:0;top:-15px;font-family:var(--mono);font-size:8.5px;color:var(--indigo-t);letter-spacing:.1em}
+.pt-bar{position:relative;height:9px}
+.pt-seg{position:absolute;top:0;height:9px;border-radius:1.5px;background:#39435A;cursor:pointer;transition:background .2s}
+.pt-seg:hover{background:#5A6580}
+.pt-seg.big{background:rgba(109,92,255,.8)}
+.pt-seg.big:hover{background:var(--indigo)}
+.pt-seg.last{background:rgba(18,229,180,.7)}
+.pt-seg.last:hover{background:var(--teal)}
+.pt-lbls{position:relative;height:34px;margin-top:6px}
+.pt-l{position:absolute;font-family:var(--mono);font-size:8.5px;color:var(--faint);white-space:nowrap;
+  transform:translateX(-50%) rotate(-13deg);transform-origin:top center}
+/* ============ slide 01 ============ */
+.s1-head{flex:none}
+.s1t{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;font-size:26px}
+.s1t .s1-sub{font-size:14px;font-weight:400;font-style:italic;color:var(--dim);letter-spacing:0}
+.s1-diagram{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
+.s1-diagram .mst{height:100%;width:100%}
+.s1-foot{flex:none;display:flex;align-items:stretch;gap:16px;margin-top:4px}
+.s1-cap{flex:1;font-family:var(--mono);font-size:11.5px;color:var(--dim);border-left:2px solid var(--indigo);
+  padding:8px 14px;background:var(--panel);display:flex;align-items:center;transition:opacity .16s;min-height:40px}
+.s1-cap b{color:var(--indigo-t);font-weight:500}
+.s1-steps{display:flex;gap:6px;flex:none;align-items:center}
+.s1-steps button{font-family:var(--mono);font-size:9px;letter-spacing:.08em;color:var(--faint);
+  border:1px solid var(--line);border-radius:3px;padding:8px 10px;background:var(--panel);transition:.25s}
+.s1-steps button:hover{border-color:var(--line2);color:var(--dim)}
+.s1-steps button.past{color:var(--teal-t);border-color:rgba(18,229,180,.4)}
+.s1-steps button.act{color:#fff;background:var(--indigo);border-color:var(--indigo);font-weight:700}
+#stage[data-theme="light"] .s1-steps button.act{color:#fff}
+/* ============ slide 02 ============ */
+.s2-grid{display:grid;grid-template-columns:322px 1fr;gap:20px;height:100%;grid-template-rows:minmax(0,1fr)}
+.s2-trad .tf-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 0}
+.tf-node{width:198px;text-align:center;font-family:var(--mono);font-size:12px;color:var(--dim);
+  border:1px solid var(--line2);border-radius:5px;padding:9px 0;background:var(--panel2)}
+.tf-node small{display:block;font-size:9px;color:var(--faint);margin-top:2px}
+.tf-arr{color:var(--faint);font-size:9px;line-height:1.7}
+.tf-err{border-color:rgba(255,92,122,.5);color:var(--coral-t)}
+.tf-500{border-color:var(--coral);background:var(--coral-d);color:var(--coral-t);font-weight:700;font-size:14px}
+.s2-note{flex:none;font-family:var(--mono);font-size:10px;color:var(--dim);line-height:1.65;
+  border-top:1px dashed var(--line2);padding-top:9px;margin:0 14px 10px}
+.s2-note b{color:var(--coral-t);font-weight:500}
+.s2-agent{display:flex;flex-direction:column}
+.s2-agent .mst{flex:1;min-height:0}
+.s2-strip{flex:none;display:flex;gap:8px;margin:8px 12px 10px;font-family:var(--mono);font-size:10px;flex-wrap:wrap}
+.s2-strip span{border:1px solid rgba(18,229,180,.4);color:var(--teal-t);border-radius:3px;padding:4px 10px;background:var(--teal-d)}
+.s2-strip span.bad{border-color:var(--coral);color:var(--coral-t);background:var(--coral-d);margin-left:auto}
+/* ============ slide 03 ============ */
+.s3-grid{display:grid;grid-template-columns:1fr 402px;gap:20px;height:100%}
+.s3-l .mst{flex:1;min-height:0}
+.s3-r{display:flex;flex-direction:column}
+.tree{flex:1;padding:10px 8px;display:flex;flex-direction:column;min-height:0}
+.thead{font-family:var(--mono);font-size:10px;color:var(--indigo-t);padding:2px 10px 9px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.trow{display:grid;grid-template-columns:156px 52px 1fr;gap:8px;align-items:center;padding:7px 10px;
+  border-radius:4px;font-family:var(--mono);cursor:pointer;transition:background .2s;flex:1}
+.trow:hover{background:var(--indigo-d)}
+.trow .tn{font-size:11px;color:var(--ink);white-space:nowrap}
+.trow .tn i{font-style:normal;color:var(--faint)}
+.trow .td{font-size:10px;color:var(--teal-t)}
+.trow .ta{font-size:9px;color:var(--faint);line-height:1.5}
+.trow.tr-err .tn,.trow.tr-err .td{color:var(--coral-t)}
+.s3-note{flex:none;font-family:var(--mono);font-size:10px;color:var(--amber);border-top:1px dashed var(--line2);padding:9px 12px}
+/* ============ slide 04 ============ */
+.s4-grid{display:grid;grid-template-columns:1fr 378px;gap:20px;height:100%}
+.s4-l .mst{flex:1;min-height:0}
+.s4-sub{flex:none;font-family:var(--mono);font-size:10px;color:var(--faint);padding:8px 13px;border-top:1px dashed var(--line)}
+.s4-sub b{color:var(--indigo-t);font-weight:500}
+.s4-r{display:flex;flex-direction:column;gap:12px}
+.s4-log{flex:1;min-height:0;overflow:hidden;padding:9px 11px;font-family:var(--mono);font-size:10px;line-height:1.95}
+.slg{color:var(--dim);animation:rise .3s ease}
+.slg.err{color:var(--coral-t)} .slg.ok{color:var(--teal-t)} .slg.warn{color:var(--amber)}
+.slg .ts{color:#4A5468;margin-right:6px}
+#stage[data-theme="light"] .slg .ts{color:#9AA3B4}
+.s4-msg{flex:none;font-family:var(--mono);font-size:11px;line-height:1.7;
+  border:1px dashed rgba(255,92,122,.45);background:var(--coral-d);color:var(--coral-t);border-radius:6px;padding:12px 14px}
+.s4-msg b{color:var(--ink);font-weight:500}
+/* ============ slide 05 ============ */
+.s5-wrap{display:flex;flex-direction:column;height:100%;gap:12px;min-height:0}
+.s5-grid{display:grid;grid-template-columns:1fr 480px;gap:20px;flex:1;min-height:0}
+.s5-cards{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:12px}
+.lens{border:1px solid var(--line);border-left:3px solid var(--lc);border-radius:6px;background:var(--panel);
+  padding:11px 14px;display:flex;flex-direction:column;gap:5px;min-height:0}
+.lens h4{font-size:15px;letter-spacing:.04em;display:flex;gap:9px;align-items:baseline}
+.lens h4 i{font-style:normal;font-family:var(--mono);font-size:11px;color:var(--lc)}
+.lens .lc{font-family:var(--mono);font-size:10px;color:var(--dim);line-height:1.7}
+.lens p{font-family:var(--mono);font-size:9.5px;color:var(--faint);margin-top:auto}
+.mapwrap{position:relative;width:100%;aspect-ratio:1180/540}
+.mapwrap .mst{position:absolute;inset:0}
+.s5-map .pnl-h{border-radius:6px 6px 0 0}
+.zb{position:absolute;transform:translate(-40%,-55%);font-family:var(--mono);font-weight:700;font-size:10px;
+  width:20px;height:20px;border-radius:4px;display:grid;place-items:center;background:var(--bg);font-style:normal}
+.zb-t{border:1px solid var(--teal);color:var(--teal-t)}
+.zb-i{border:1px solid var(--indigo);color:var(--indigo-t)}
+.zb-a{border:1px solid var(--amber);color:var(--amber)}
+.zb-e{border:1px solid var(--coral);color:var(--coral-t)}
+.s5-mapnote{font-family:var(--mono);font-size:9.5px;color:var(--faint);line-height:1.65;padding:9px 13px;border-top:1px dashed var(--line);margin-top:auto}
+.s5-eq{flex:none;display:flex;align-items:center;gap:9px;font-family:var(--mono);font-size:11px;
+  justify-content:center;border:1px dashed var(--line2);border-radius:6px;padding:10px;flex-wrap:wrap}
+.s5-eq>b{color:var(--faint);font-weight:400}
+.eq-b{padding:5px 12px;border-radius:3px;letter-spacing:.08em}
+.e-t{background:var(--teal-d);border:1px solid rgba(18,229,180,.45);color:var(--teal-t)}
+.e-i{background:var(--indigo-d);border:1px solid rgba(109,92,255,.5);color:var(--indigo-t)}
+.e-a{background:var(--amber-d);border:1px solid rgba(245,180,85,.5);color:var(--amber)}
+.e-e{background:var(--coral-d);border:1px solid rgba(255,92,122,.5);color:var(--coral-t)}
+.eq-res{font-weight:700;letter-spacing:.12em;color:var(--ink);padding:6px 14px;border:1px solid var(--line2);border-radius:3px;background:var(--panel2)}
+/* ============ slide 06 ============ */
+.s6-grid{display:grid;grid-template-columns:1fr 420px;gap:20px;height:100%;grid-template-rows:minmax(0,1fr)}
+.bands{display:flex;flex-direction:column;gap:9px;min-height:0}
+.band6{flex:1;display:grid;grid-template-columns:44px 1fr 150px;gap:13px;align-items:center;
+  border:1px solid var(--line);border-left:3px solid var(--lc);border-radius:6px;background:var(--panel);
+  padding:6px 13px 6px 9px;min-height:0}
+.b6-l{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--lc);text-align:center}
+.b6-h{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.b6-h b{font-size:13.5px;letter-spacing:.03em}
+.b6-h span{font-family:var(--mono);font-size:9px;color:var(--faint);letter-spacing:.1em;text-transform:uppercase}
+.b6-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.b6-w{font-family:var(--mono);font-size:9px;color:var(--faint);line-height:1.6;text-align:right;
+  border-left:1px dashed var(--line2);padding-left:11px}
+.b6-w b{color:var(--dim);font-weight:400}
+.s6-r{display:flex;flex-direction:column;gap:12px;min-height:0}
+.s6-note{font-family:var(--mono);font-size:10px;color:var(--dim);line-height:1.7;
+  border:1px dashed rgba(109,92,255,.45);background:var(--indigo-d);border-radius:5px;padding:11px 13px}
+.s6-note b{color:var(--indigo-t);font-weight:500}
+/* ============ slide 07 ============ */
+.s7-grid{display:grid;grid-template-columns:648px 1fr;gap:20px;height:100%}
+.s7-l .mst{flex:1;min-height:0}
+.qstrip{flex:none;margin:9px 12px 11px;font-family:var(--mono);font-size:9.5px;color:var(--dim);
+  border:1px dashed var(--line2);border-radius:5px;padding:9px 12px;line-height:1.7}
+.qstrip code{color:var(--teal-t)}
+.qstrip b{color:var(--ink);font-weight:500}
+.s7-r{display:flex;flex-direction:column;gap:12px}
+.rt{border:1px solid var(--line);border-radius:6px;background:var(--panel);padding:12px 15px;flex:1;
+  display:flex;flex-direction:column;gap:7px;justify-content:center;min-height:0}
+.rt h5{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;color:var(--dim)}
+.rt h5 i{font-style:normal;color:var(--indigo-t);margin-right:9px}
+.rt .path{font-family:var(--mono);font-size:12.5px;color:var(--ink)}
+.rt .path b{color:var(--indigo-t);font-weight:500}
+.rt p{font-family:var(--mono);font-size:10px;color:var(--faint);line-height:1.65}
+.rt p em{font-style:normal;color:var(--teal-t)}
+/* ============ slide 07.4 · meridian claims system diagram ============ */
+.s7m-wrap{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:6px;background:var(--panel)}
+.s7m-svg{width:100%;height:100%;display:block}
+/* ============ slide 08 ============ */
+.s8-grid{display:grid;grid-template-columns:452px 1fr;gap:26px;height:100%}
+.ringbox{display:flex;flex-direction:column}
+.ringbox .rgwrap{flex:1;min-height:0;position:relative}
+.ringbox svg{width:100%;height:100%;display:block}
+.rg-base{fill:none;stroke:#1D2331;stroke-width:2}
+#stage[data-theme="light"] .rg-base{stroke:#DEE3EC}
+.rg-rot{fill:none;stroke:#232B3D;stroke-dasharray:3 9;transform-origin:230px 224px;animation:spin 60s linear infinite}
+#stage[data-theme="light"] .rg-rot{stroke:#C7CEDC}
+.rg-arc{fill:none;stroke:#39435A;stroke-width:1.3}
+#stage[data-theme="light"] .rg-arc{stroke:#9AA3B4}
+.rg-n circle{fill:#0F1420;stroke:#33405C;stroke-width:1.5;transition:.4s}
+#stage[data-theme="light"] .rg-n circle{fill:#FFFFFF;stroke:#C7CEDC}
+.rg-n .rg-num{fill:#707C92;font-size:13px;font-weight:700;transition:.4s}
+.rg-n.act circle{fill:var(--indigo-d);stroke:var(--indigo)}
+.rg-n.act .rg-num{fill:var(--indigo-t)}
+.rg-lb{fill:var(--faint);font-size:9px;letter-spacing:.14em}
+.rg-c{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
+.rg-c>div{display:flex;flex-direction:column;align-items:center;gap:6px}
+.rg-c .mst{width:186px;height:80px;opacity:.65}
+.rg-c span{font-family:var(--mono);font-size:8.5px;color:var(--faint);letter-spacing:.12em}
+.mani{display:flex;flex-direction:column;gap:13px}
+.mani p{font-size:20px;line-height:1.35;color:var(--dim)}
+.mani p b{color:var(--ink);font-weight:600}
+.mani .m-final b{color:var(--indigo-t)}
+.mani .m-final span{color:var(--teal)}
+.loopcode{font-family:var(--mono);font-size:10.5px;color:var(--teal-t);
+  border:1px dashed rgba(18,229,180,.4);background:var(--teal-d);border-radius:5px;padding:11px 13px}
+.loopnote{font-family:var(--mono);font-size:10px;color:var(--faint);margin-top:auto;border-top:1px solid var(--line);padding-top:10px}
+/* ============ slide 09 ============ */
+.s9-wrap{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
+.mm{height:100%;width:100%;display:block}
+.obsbox>rect{fill:rgba(18,229,180,.07);stroke:rgba(18,229,180,.6)}
+.obsbox>rect.inner{fill:none;stroke:rgba(18,229,180,.35);stroke-dasharray:4 4}
+/* ============ slide 10 ============ */
+.s10{display:grid;grid-template-columns:1fr 330px;gap:40px;min-height:0;align-items:start}
+.s10-title{font-size:56px;line-height:1.02;font-weight:700;letter-spacing:-.02em;margin-top:22px}
+.s10-title .hollow{color:transparent;-webkit-text-stroke:1.5px var(--indigo-t)}
+.s10-sub{font-family:var(--mono);font-size:12px;color:var(--dim);margin-top:18px;letter-spacing:.08em}
+.contacts{margin-top:30px}
+.lrow{display:flex;align-items:center;gap:14px;font-family:var(--mono);font-size:14px;color:var(--dim);
+  border:1px solid var(--line2);border-radius:6px;padding:15px 16px;text-decoration:none;
+  background:var(--panel);transition:border-color .2s,background .2s}
+.lrow:hover{border-color:var(--indigo);background:var(--indigo-d)}
+.lrow svg{flex:none;color:var(--indigo-t)}
+.lrow .lu b{color:var(--ink);font-weight:500}
+.lrow .lcta{margin-left:auto;font-size:10px;letter-spacing:.12em;color:var(--indigo-t);
+  border:1px solid rgba(109,92,255,.45);border-radius:3px;padding:5px 10px;background:var(--indigo-d);transition:.2s}
+.lrow:hover .lcta{background:var(--indigo);color:#fff;border-color:var(--indigo)}
+.repo-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.qrcol{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+.qrframe{position:relative;width:246px;height:246px;padding:16px;background:var(--panel);border:1px solid var(--line)}
+.qrframe .cb{position:absolute;width:17px;height:17px;border:2px solid var(--indigo)}
+.qrframe .cb:nth-child(1){top:-2px;left:-2px;border-right:none;border-bottom:none}
+.qrframe .cb:nth-child(2){top:-2px;right:-2px;border-left:none;border-bottom:none}
+.qrframe .cb:nth-child(3){bottom:-2px;left:-2px;border-right:none;border-top:none}
+.qrframe .cb:nth-child(4){bottom:-2px;right:-2px;border-left:none;border-top:none}
+#qrbox{width:100%;height:100%;display:grid;place-items:center}
+#qrbox svg{width:100%;height:100%}
+#qrbox .qr-fallback-url{font-family:var(--mono);font-size:11px;color:var(--ink);text-align:center;padding:10px;word-break:break-all}
+.qr-lbl{font-family:var(--mono);font-size:10px;color:var(--faint);text-align:center;line-height:1.7;max-width:250px}
+.qr-lbl b{color:var(--indigo-t);font-weight:500}
+.venue{margin-top:14px;border-top:1px solid var(--line);padding-top:13px;display:flex;align-items:center;gap:12px;justify-content:center;
+  font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:.1em}
+.venue b{color:var(--teal-t);font-weight:500}
+.venue svg{stroke:var(--teal)}
+/* ============ slide 07.5 · LIVE DEMO hand-off ============ */
+.s7d-wrap{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;text-align:center}
+.s7d-icon{width:96px;height:96px;border:1px solid var(--indigo);border-radius:16px;display:grid;place-items:center;background:var(--indigo-d)}
+.s7d-icon svg{stroke:var(--indigo-t)}
+.s7d-title{font-size:40px;font-weight:700;letter-spacing:-.02em}
+.s7d-title .hollow{color:transparent;-webkit-text-stroke:1.3px var(--teal-t)}
+.s7d-sub{font-family:var(--mono);font-size:13px;color:var(--dim);max-width:640px;line-height:1.7}
+.s7d-checks{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:6px}
+.s7d-checks span{font-family:var(--mono);font-size:10.5px;color:var(--teal-t);border:1px solid rgba(18,229,180,.4);
+  background:var(--teal-d);border-radius:20px;padding:6px 14px}
+/* hint toast */
+#hint{position:absolute;right:20px;bottom:64px;z-index:70;font-family:var(--mono);font-size:10px;color:var(--dim);
+  background:var(--panel2);border:1px solid var(--line2);border-radius:4px;padding:8px 13px;letter-spacing:.06em;
+  transition:opacity .6s,transform .6s}
+#hint.bye{opacity:0;transform:translateY(6px);pointer-events:none}
+#hint b{color:var(--indigo-t);font-weight:500}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+</style></head><body><div id="stage">
+  <header id="chromeTop">
+    <div class="ct-l">
+      <svg width="14" height="12" viewBox="0 0 14 12" fill="none"><path d="M0 8 L3 8 L5 2 L8 11 L10 6 L11 8 L14 8" stroke="#12E5B4" stroke-width="1.4"/></svg>
+      <span>cloud-native-day/gandhinagar <b>▸ agents-and-observability</b></span>
+    </div>
+    <div class="ct-r" style="display:flex;gap:16px;align-items:center">
+      <span>trace <b id="sesTrace">—</b></span>
+      <span id="slideNum">00 / 12</span>
+      <span id="clock">--:--:-- UTC</span>
+      <button id="themeBtn" aria-label="toggle theme" title="toggle light/dark theme">
+        <svg id="themeIcon" width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4.5" stroke-width="1.6"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </header>
+  <main id="deck">
+  <!-- ============ SLIDE 00 · TITLE / ROOT SPAN ============ -->
+  <section class="slide" data-name="session.start" data-dur="500">
+    <div class="body">
+      <div class="sT-grid">
+        <div class="sT-left">
+          <div class="kicker" data-rv><span class="k-num">ROOT</span> Cloud Native Day 2026 · Gandhinagar</div>
+          <h1 class="sT-title" data-rv>USE <span class="hollow">OBSERVABILITY</span><br>THE CRITICAL IMPORTANCE OF LLM<br>OBSERVABILITY IN ENTERPRISE AGENTS</h1>
+          <p class="sT-sub" data-rv>— from a single AI agent to a production multi-agent system</p>
+          <div class="sT-speaker" data-rv>
+            <div class="sT-ava">AP</div>
+            <div>
+              <div class="sT-name">Ashish Patel</div>
+              <div class="sT-role">Sr Principal Architect — AI · ML · DS <b>@ Oracle</b></div>
+            </div>
+          </div>
+          <div class="sT-meta" data-rv>Sept 5 2026 · 45-min technical session · advanced devops &amp; infrastructure track</div>
+        </div>
+        <div class="sT-right">
+          <div class="pnl" data-rv>
+            <div class="pnl-h"><span><span class="dot"></span>obs-cli · session boot</span><span>root span</span></div>
+            <div class="sT-boot" id="bootLog"></div>
+          </div>
+          <div class="pnl sT-prev" data-rv>
+            <div class="pnl-h"><span><span class="dot"></span>talk.preview</span><span>12 spans · one trace</span></div>
+            <div class="pt-wrap">
+              <div class="pt-root"></div>
+              <div class="pt-bar" id="ptBar"></div>
+              <div class="pt-lbls" id="ptLbls"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="core"><b>core ▸</b> root span opened — 45 minutes, one system (Meridian Claims), one trace. press → to open span 01.</div>
+  </section>
+  <!-- ============ SLIDE 01 · THE MENTAL MODEL (builds in 5 stages) ============ -->
+  <section class="slide" data-name="how-agents-work" data-dur="3200">
+    <div class="shead s1-head">
+      <div class="kicker"><span class="k-num">01</span> The Mental Model</div>
+      <h2 class="stitle s1t">From AI Agent to Production Multi-Agent System <span class="s1-sub">— using a real claims-adjudication system as the example</span></h2>
+    </div>
+    <div class="body">
+      <div class="s1-diagram" data-rv><div id="m1" class="mst"></div></div>
+      <div class="s1-foot" data-rv>
+        <div class="s1-cap" id="s1cap">① an <b>LLM</b> — text in, text out. no state · no tools · no decisions.</div>
+        <div class="s1-steps" id="s1steps">
+          <button data-st="1">LLM</button>
+          <button data-st="2">+ LOOP</button>
+          <button data-st="3">+ TOOLS·MEM</button>
+          <button data-st="4">+ AGENTS</button>
+          <button data-st="5">+ OBSERVE</button>
+        </div>
+      </div>
+    </div>
+    <div class="core"><b>core ▸</b> one picture, five layers: llm → control loop → tools &amp; memory → specialists → the plane that watches it all. (press → to build it)</div>
+  </section>
+  <!-- ============ SLIDE 02 · THE PROBLEM ============ -->
+  <section class="slide" data-name="http-200" data-dur="1800">
+    <div class="shead">
+      <div class="kicker"><span class="k-num">02</span> The Problem</div>
+      <h2 class="stitle">Why Traditional Observability Isn't Enough</h2>
+    </div>
+    <div class="body s2-grid">
+      <div class="pnl s2-trad" data-rv>
+        <div class="pnl-h"><span><span class="dot"></span>Traditional Service</span><span>deterministic</span></div>
+        <div class="tf-body">
+          <div class="tf-node">CLAIM SUBMITTED</div><div class="tf-arr">▼</div>
+          <div class="tf-node">SERVICE<small>known logic · known paths</small></div><div class="tf-arr">▼</div>
+          <div class="tf-node tf-err">ERROR ✗</div><div class="tf-arr">▼</div>
+          <div class="tf-node tf-500">HTTP 500</div>
+        </div>
+        <div class="s2-note">fails <b>loud</b> — the pager fires in seconds, the stack trace names the line.</div>
+      </div>
+      <div class="pnl s2-agent" data-rv>
+        <div class="pnl-h"><span><span class="dot"></span>Meridian Claims · Same Request</span><span>non-deterministic</span></div>
+        <div id="m2" class="mst"></div>
+        <div class="s2-strip">
+          <span>tool called ✓</span><span>decision reached ✓</span><span>HTTP 200</span>
+          <span class="bad">decision: wrong</span>
+        </div>
+        <div class="s2-note" style="margin:0 12px 10px;border-top:1px dashed var(--line2);padding-top:9px">in health insurance, this isn't a UX bug — a wrongly denied claim <b>with no reconstructable reason</b> is a compliance and liability exposure, not just a bad answer.</div>
+      </div>
+    </div>
+    <div class="core"><b>core ▸</b> HTTP 200 ≠ correct behavior — the medical history agent called its tool correctly and still missed the exclusion.</div>
+  </section>
+  <!-- ============ SLIDE 03 · TRACE ANATOMY ============ -->
+  <section class="slide" data-name="trace-anatomy" data-dur="2400">
+    <div class="shead">
+      <div class="kicker"><span class="k-num">03</span> Trace Anatomy</div>
+      <h2 class="stitle">Anatomy of a Claim's Trace</h2>
+    </div>
+    <div class="body s3-grid">
+      <div class="pnl s3-l" data-rv>
+        <div class="pnl-h"><span><span class="dot"></span>The System · Policy Verification Agent</span><span>what ran</span></div>
+        <div id="m3" class="mst"></div>
+      </div>
+      <div class="pnl s3-r" data-rv>
+        <div class="pnl-h"><span><span class="dot"></span>The Trace It Emits</span><span>what it recorded</span></div>
+        <div class="tree">
+          <div class="thead">SESSION CLM-9001 · 6 spans · 4.9 s</div>
+          <div class="trow" data-t="agent|arrows"><span class="tn"><i>├</i> policy.run</span><span class="td">4.90s</span><span class="ta">root span · status OK · 1 llm + 1 mcp call</span></div>
+          <div class="trow" data-t="llm"><span class="tn"><i>├</i> llm.decide</span><span class="td">0.9s</span><span class="ta">qwen2.5:7b · 312 in / 88 out tok · local</span></div>
+          <div class="trow" data-t="tools"><span class="tn"><i>├</i> mcp.check_coverage</span><span class="td">0.4s</span><span class="ta">stdio · policy POL-1001 · procedure 99213</span></div>
+          <div class="trow" data-t="tools"><span class="tn"><i>├</i> finding.recorded</span><span class="td">0.1s</span><span class="ta">covered:true · deductible_met:true</span></div>
+          <div class="trow" data-t="memory"><span class="tn"><i>├</i> user.tag</span><span class="td">0.02s</span><span class="ta">patient_id → langfuse user · cost by patient</span></div>
+          <div class="trow" data-t="evalzone"><span class="tn"><i>└</i> score.groundedness</span><span class="td">1.6s</span><span class="ta">app-managed judge · 1.0 · PASSED — quotes tool output</span></div>
+        </div>
+        <div class="s3-note">▸ hover a span — see exactly where it lives in the system. every field above came out of a real Langfuse trace, not a mock.</div>
+      </div>
+    </div>
+    <div class="core"><b>core ▸</b> every span is a decision you can interrogate: tokens, MCP calls, groundedness — parent → child, all the way down.</div>
+  </section>
+  <!-- ============ SLIDE 04 · MULTI-AGENT FAILURE ============ -->
+  <section class="slide" data-name="multi-agent" data-dur="2200">
+    <div class="shead">
+      <div class="kicker"><span class="k-num">04</span> Distributed Intelligence</div>
+      <h2 class="stitle">Multi-Agent: Where Failure Is Born</h2>
+    </div>
+    <div class="body s4-grid">
+      <div class="pnl s4-l" data-rv>
+        <div class="pnl-h"><span><span class="dot"></span>Supervisor + 3 Specialists + Decision Gate</span><span>cycle <b id="s4cy">1</b></span></div>
+        <div id="m4" class="mst"></div>
+        <div class="s4-sub">every arrow is a span boundary — <b>the trace context travels with each handoff</b></div>
+      </div>
+      <div class="s4-r">
+        <div class="pnl" style="flex:1;min-height:0" data-rv>
+          <div class="pnl-h"><span><span class="dot"></span>Live Session · CLM-9004</span><span><span style="color:var(--coral-t)">● replaying</span></span></div>
+          <div class="s4-log" id="s4log"></div>
+        </div>
+        <div class="s4-msg" data-rv>the failure was born at <b>one MCP call</b> — the pipeline still reached a decision. only the trace tells you <b>which node</b> went quiet.</div>
+      </div>
+    </div>
+    <div class="core"><b>core ▸</b> three specialist agents, one decision gate — this is already "no longer a chatbot, a distributed system."</div>
+  </section>
+  <!-- ============ SLIDE 05 · WHAT TO OBSERVE ============ -->
+  <section class="slide" data-name="observe-what" data-dur="2000">
+    <div class="shead">
+      <div class="kicker"><span class="k-num">05</span> Signals</div>
+      <h2 class="stitle">What Should We Observe?</h2>
+    </div>
+    <div class="body s5-wrap">
+      <div class="s5-grid">
+        <div class="s5-cards">
+          <div class="lens" style="--lc:var(--teal)" data-rv><h4><i>①</i>SYSTEM</h4><div class="lc">FastAPI request latency · SQLite write path · SSE connection health</div><p>the world your dashboards already own — this axis never changed for agents</p></div>
+          <div class="lens" style="--lc:var(--indigo-t)" data-rv><h4><i>②</i>LLM</h4><div class="lc">940 tokens/claim · 4.9s p50 · qwen2.5:7b local, $0/call</div><p>local inference makes cost a non-issue here — latency is the real budget</p></div>
+          <div class="lens" style="--lc:var(--amber)" data-rv><h4><i>③</i>AGENT</h4><div class="lc">which MCP tool fired · sequence order held · one Langfuse session per claim</div><p>the control loop is the application now — a wrong tool choice is a bug, not a stack trace</p></div>
+          <div class="lens" style="--lc:var(--coral)" data-rv><h4><i>④</i>QUALITY</h4><div class="lc">decision_correct score · groundedness 0-1 · 4/4 eval dataset pass rate</div><p>the layer everyone forgets — a claim can look "done" and still be wrong</p></div>
+        </div>
+        <div class="pnl s5-map" data-rv>
+          <div class="pnl-h"><span><span class="dot"></span>Where Each Lens Looks</span></div>
+          <div style="padding:10px 12px 4px">
+            <div class="mapwrap">
+              <div id="m5" class="mst"></div>
+              <i class="zb zb-t" style="left:15.7%;top:44.8%">1</i>
+              <i class="zb zb-i" style="left:42.2%;top:8.9%">2</i>
+              <i class="zb zb-a" style="left:21.2%;top:23%">3</i>
+              <i class="zb zb-e" style="left:4.1%;top:91.5%">4</i>
+            </div>
+          </div>
+          <div class="s5-mapnote">① substrate · ② the brain · ③ the control loop &amp; handoffs · ④ the output gate</div>
+        </div>
+      </div>
+      <div class="s5-eq" data-rv>
+        <span class="eq-b e-t">TRADITIONAL</span><b>+</b>
+        <span class="eq-b e-i">LLM</span><b>+</b>
+        <span class="eq-b e-a">AGENT</span><b>+</b>
+        <span class="eq-b e-e">EVALS</span><b>=</b>
+        <span class="eq-res">AI OBSERVABILITY</span>
+      </div>
+    </div>
+    <div class="core"><b>core ▸</b> four lenses — system, llm, agent, quality. miss one, and you are blind on that axis.</div>
+  </section>
+  <!-- ============ SLIDE 06 · TOOL LANDSCAPE ============ -->
+  <section class="slide" data-name="tool-landscape" data-dur="1800">
+    <div class="shead">
+      <div class="kicker"><span class="k-num">06</span> Landscape</div>
+      <h2 class="stitle">The Tool Landscape — Five Layers</h2>
+    </div>
+    <div class="body s6-grid">
+      <div class="bands">
+        <div class="band6" style="--lc:var(--coral)" data-rv><div class="b6-l">L5</div><div><div class="b6-h"><b>EVALUATION</b><span>quality · regression · drift</span></div><div class="b6-chips"><span class="chip">Langfuse Datasets</span><span class="chip">Langfuse Scores</span><span class="chip">app-managed LLM-judge</span></div></div><div class="b6-w">watches:<b> correctness</b><br>before every deploy</div></div>
+        <div class="band6" style="--lc:var(--indigo-t)" data-rv><div class="b6-l">L4</div><div><div class="b6-h"><b>AGENT OBSERVABILITY</b><span>traces · sessions · users</span></div><div class="b6-chips"><span class="chip">Langfuse Tracing</span><span class="chip">Langfuse Sessions</span><span class="chip">Langfuse Users</span></div></div><div class="b6-w">watches:<b> the loop</b><br>one session per claim</div></div>
+        <div class="band6" style="--lc:var(--amber)" data-rv><div class="b6-l">L3</div><div><div class="b6-h"><b>LLM GATEWAY</b><span>routing · fallback · cost</span></div><div class="b6-chips"><span class="chip">Ollama (local, primary)</span><span class="chip">OpenRouter (fallback)</span></div></div><div class="b6-w">watches:<b> every call</b><br>free-tier fallback chain</div></div>
+        <div class="band6" style="--lc:var(--teal)" data-rv><div class="b6-l">L2</div><div><div class="b6-h"><b>TOOL INTEGRATION</b><span>MCP · stdio · structured data</span></div><div class="b6-chips"><span class="chip">MCP server (stdio)</span><span class="chip">CrewAI MCP adapter</span></div></div><div class="b6-w">watches:<b> tool calls</b><br>policy · history · fraud</div></div>
+        <div class="band6" style="--lc:var(--teal)" data-rv><div class="b6-l">L1</div><div><div class="b6-h"><b>APPLICATION</b><span>FastAPI · SQLite · Next.js</span></div><div class="b6-chips"><span class="chip">FastAPI</span><span class="chip">SQLite</span><span class="chip">Next.js portal</span></div></div><div class="b6-w">watches:<b> substrate</b><br>everything runs on</div></div>
+      </div>
+      <div class="s6-r">
+        <div class="pnl" data-rv>
+          <div class="pnl-h"><span><span class="dot"></span>The System Every Layer Watches</span></div>
+          <div style="padding:10px 12px"><div class="mapwrap"><div id="m6" class="mst"></div></div></div>
+        </div>
+        <div class="s6-note" data-rv><b>Langfuse is more than tracing here</b> — Sessions group a claim's whole pipeline into one timeline instead of three disconnected traces. Users attribute LLM spend per patient, not just per app. Datasets + Scores turn "we fixed a bug" into "4/4 green," not a shrug. One honest caveat: the groundedness judge is app-managed, not Langfuse's native evaluator-rule engine — that migration is a known follow-up, not a finished feature.</div>
+      </div>
+    </div>
+    <div class="core"><b>core ▸</b> five layers, open standards at the seams — MCP for tools, Langfuse for the rest.</div>
+  </section>
+  <!-- ============ SLIDE 07 · PRODUCTION ARCHITECTURE ============ -->
+  <section class="slide" data-name="production-arch" data-dur="2600">
+    <div class="shead">
+      <div class="kicker"><span class="k-num">07</span> The Climax</div>
+      <h2 class="stitle">Production Architecture — Meridian Claims</h2>
+    </div>
+    <div class="body s7-grid">
+      <div class="pnl s7-l" data-rv>
+        <div class="pnl-h"><span><span class="dot"></span>The Full System · One Trace, One Plane</span><span>stage 5 — everything on</span></div>
+        <div id="m7" class="mst"></div>
+        <div class="qstrip"><code>GET /claims/{id} → findings + decision + Langfuse session URL</code><br><b>one query plane</b> — the portal, the claim, and the trace are always one click apart</div>
+      </div>
+      <div class="s7-r">
+        <div class="rt" data-rv><h5><i>①</i>NEXT.JS PORTAL</h5><div class="path">SSE ─▶ <b>live agent activity</b></div><p>claims queue · new-claim form · audit trail · <em>every finding links its trace</em></p></div>
+        <div class="rt" data-rv><h5><i>②</i>MCP TOOL SERVER</h5><div class="path">CrewAI agents ─▶ <b>stdio MCP server</b></div><p>check_coverage · lookup_medical_history · fraud_score — real tool calls, real spans</p></div>
+        <div class="rt" data-rv><h5><i>③</i>LANGFUSE CLOUD</h5><div class="path">agents ─▶ <b>Sessions · Datasets · Scores</b></div><p>one session per claim · eval dataset re-run on every fix · continuous groundedness scoring</p></div>
+      </div>
+    </div>
+    <div class="core"><b>core ▸</b> the observability plane is a first-class citizen of the architecture — not a bolt-on dashboard. no docker required.</div>
+  </section>
+  <!-- ============ SLIDE 07.4 · MERIDIAN CLAIMS SYSTEM DIAGRAM ============ -->
+  <section class="slide" data-name="meridian-system" data-dur="1600">
+    <div class="shead">
+      <div class="kicker"><span class="k-num">07a</span> Meet The System</div>
+      <h2 class="stitle">Meridian Claims — the actual system, named</h2>
+    </div>
+    <div class="body s7m-wrap" data-rv>
+      <svg class="s7m-svg" viewBox="0 0 1180 480" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="s7ma" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#5A6580"/></marker>
+        </defs>
+        <text x="20" y="30" class="m-ti" font-size="20" font-weight="700">MERIDIAN CLAIMS</text>
+        <text x="20" y="48" class="m-tf" font-size="9.5">health-insurance claims adjudication · this project, running</text>
+        <g class="mnd mn-d"><rect x="20" y="70" width="230" height="56" rx="7"/><text x="135" y="92" text-anchor="middle" font-size="11">NEXT.JS PORTAL</text><text x="135" y="110" class="m-tf" font-size="8.5" text-anchor="middle">queue · new claim · audit trail</text></g>
+        <line x1="250" y1="98" x2="300" y2="98" class="m-ln" marker-end="url(#s7ma)"/>
+        <text x="255" y="90" class="m-tf" font-size="8">REST + SSE</text>
+        <g class="mnd mn-i"><rect x="300" y="70" width="230" height="56" rx="7"/><text x="415" y="92" text-anchor="middle" font-size="11">FASTAPI BACKEND</text><text x="415" y="110" class="m-tf" font-size="8.5" text-anchor="middle">uv-managed · SQLite</text></g>
+        <line x1="415" y1="126" x2="415" y2="158" class="m-ln" marker-end="url(#s7ma)"/>
+        <g class="mbx"><rect x="80" y="162" width="670" height="90" rx="9"/><text x="415" y="182" class="m-ti" font-size="11" font-weight="700" text-anchor="middle">CREWAI CREW · SEQUENTIAL</text>
+          <g class="mnd mn-t"><rect x="100" y="196" width="190" height="42" rx="6"/><text x="195" y="222" text-anchor="middle" font-size="9.5">POLICY VERIFICATION</text></g>
+          <g class="mnd mn-t"><rect x="320" y="196" width="190" height="42" rx="6"/><text x="415" y="222" text-anchor="middle" font-size="9.5">MEDICAL HISTORY</text></g>
+          <g class="mnd mn-t"><rect x="540" y="196" width="190" height="42" rx="6"/><text x="635" y="222" text-anchor="middle" font-size="9.5">FRAUD / EXCEPTION</text></g>
+        </g>
+        <line x1="195" y1="252" x2="195" y2="278" class="m-ln ln-t" marker-end="url(#s7ma)"/>
+        <line x1="415" y1="252" x2="415" y2="278" class="m-ln ln-t" marker-end="url(#s7ma)"/>
+        <line x1="635" y1="252" x2="635" y2="278" class="m-ln ln-t" marker-end="url(#s7ma)"/>
+        <g class="mbx2r"><rect x="80" y="282" width="670" height="42" rx="7"/><text x="415" y="307" class="m-tt" font-size="10" text-anchor="middle" letter-spacing="1">MCP SERVER · stdio · check_coverage / lookup_medical_history / fraud_score</text></g>
+        <line x1="850" y1="98" x2="800" y2="98" class="m-ln ln-i" marker-end="url(#s7ma)"/>
+        <text x="805" y="90" class="m-tf" font-size="8" text-anchor="end">LiteLLM</text>
+        <g class="mnd mn-d"><rect x="850" y="70" width="230" height="56" rx="7"/><text x="965" y="88" text-anchor="middle" font-size="10.5">OLLAMA (LOCAL, PRIMARY)</text><text x="965" y="110" class="m-tf" font-size="8" text-anchor="middle">qwen2.5:7b · RTX 3060</text></g>
+        <g class="mnd mn-d"><rect x="850" y="134" width="230" height="46" rx="7"><animate attributeName="opacity" values="1;1" dur="1s"/></rect><text x="965" y="152" text-anchor="middle" font-size="9.5">OPENROUTER (FALLBACK)</text><text x="965" y="168" class="m-tf" font-size="8" text-anchor="middle">free tier</text></g>
+        <line x1="415" y1="324" x2="415" y2="352" class="m-ln ln-i" marker-end="url(#s7ma)"/>
+        <g class="obsbox"><rect x="270" y="356" width="290" height="52" rx="9"/><rect class="inner" x="278" y="362" width="274" height="40" rx="6"/><text x="415" y="380" class="m-tt" font-size="12" font-weight="700" text-anchor="middle" letter-spacing="2">LANGFUSE CLOUD</text><text x="415" y="395" class="m-tf" font-size="8" text-anchor="middle">Sessions · Users · Datasets · Scores</text></g>
+        <line x1="965" y1="180" x2="965" y2="356" class="m-ln m-dash" marker-end="url(#s7ma)"/>
+        <path d="M 965 356 C 965 400 700 400 560 382" class="m-ln m-dash" marker-end="url(#s7ma)"/>
+        <text x="990" y="270" transform="rotate(90 990 270)" class="m-tf" font-size="8" text-anchor="middle">every LLM call traced too</text>
+      </svg>
+    </div>
+    <div class="core"><b>core ▸</b> five real components, one project name — nothing on this slide is a stand-in for something else.</div>
+  </section>
+  <!-- ============ SLIDE 07.5 · LIVE DEMO HAND-OFF ============ -->
+  <section class="slide" data-name="live-demo" data-dur="1000">
+    <div class="shead">
+      <div class="kicker"><span class="k-num">07b</span> Now Watch It Run</div>
+      <h2 class="stitle">Live Demo — Meridian Claims</h2>
+    </div>
+    <div class="body s7d-wrap" data-rv>
+      <div class="s7d-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M5 3l14 9-14 9V3z" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
+      <div class="s7d-title">switching to <span class="hollow">localhost:3000</span></div>
+      <p class="s7d-sub">file a real claim · watch the floating "thinking" widget name each agent live · watch the audit trail fill in with real MCP tool output · click "View trace ↗" into the real Langfuse session</p>
+      <div class="s7d-checks">
+        <span>✓ real MCP calls</span><span>✓ real SSE stream</span><span>✓ real Langfuse trace</span><span>✓ no mocks, no slides</span>
+      </div>
+    </div>
+    <div class="core"><b>core ▸</b> everything on the last slide, running — this is the part no diagram can substitute for.</div>
+  </section>
+  <!-- ============ SLIDE 08 · IMPROVEMENT LOOP ============ -->
+  <section class="slide" data-name="improve-loop" data-dur="2000">
+    <div class="shead">
+      <div class="kicker"><span class="k-num">08</span> Closing the Loop</div>
+      <h2 class="stitle">The Production Improvement Loop</h2>
+    </div>
+    <div class="body s8-grid">
+      <div class="pnl ringbox" data-rv>
+        <div class="pnl-h"><span><span class="dot"></span>Trace → Test → Deploy → Trace</span><span>auto-cycling</span></div>
+        <div class="rgwrap" id="ringwrap"></div>
+      </div>
+      <div style="display:flex;flex-direction:column;min-height:0">
+        <div class="mani" data-rv>
+          <p>a real eval run flagged claim <b>CLM-9004</b> — expected <b>human_review</b>, got <b>approved.</b></p>
+          <p>the fraud signal for that claim had <b>no real reason</b> to route it — a seed-data gap, not an agent bug.</p>
+          <p class="m-final"><b>one fix</b> to the fraud-signal table → <span>re-run → 4/4 green.</span></p>
+        </div>
+        <div class="loopcode" data-rv>run_evals.py → 1 FAIL (CLM-9004) → fix mcp_server.py → run_evals.py → 4/4 PASS</div>
+        <div class="loopnote" data-rv>↺ this happened during this project's build — not staged for the talk</div>
+      </div>
+    </div>
+    <div class="core"><b>core ▸</b> production failures become permanent test cases — the system gets safer with every incident.</div>
+  </section>
+  <!-- ============ SLIDE 09 · THE ONE PICTURE ============ -->
+  <section class="slide" data-name="mental-model" data-dur="1600">
+    <div class="shead">
+      <div class="kicker"><span class="k-num">09</span> The Takeaway</div>
+      <h2 class="stitle">If You Remember One Picture</h2>
+    </div>
+    <div class="body">
+      <div class="s9-wrap" data-rv>
+        <svg class="mm" viewBox="0 0 1080 560" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="mma" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#5A6580"/></marker>
+            <marker id="mmt" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="rgba(18,229,180,.85)"/></marker>
+          </defs>
+          <g class="mnd mn-d"><rect x="415" y="10" width="250" height="34" rx="6"/><text x="540" y="32" text-anchor="middle" font-size="13">CLAIM SUBMITTED</text></g>
+          <line x1="540" y1="44" x2="540" y2="66" class="m-ln" marker-end="url(#mma)"/>
+          <g class="mbx"><rect x="415" y="70" width="250" height="60" rx="10"/><text x="540" y="97" class="m-ti" font-size="16" font-weight="700" text-anchor="middle">SUPERVISOR</text><text x="540" y="116" class="m-tf" font-size="9" text-anchor="middle">llm + control loop</text></g>
+          <line x1="505" y1="130" x2="192" y2="168" class="m-ln" marker-end="url(#mma)"/>
+          <line x1="540" y1="130" x2="540" y2="168" class="m-ln" marker-end="url(#mma)"/>
+          <line x1="575" y1="130" x2="888" y2="168" class="m-ln" marker-end="url(#mma)"/>
+          <g class="mnd mn-i"><rect x="95" y="172" width="190" height="52" rx="7"/><text x="190" y="203" text-anchor="middle" font-size="13">LLM</text></g>
+          <g class="mnd mn-t"><rect x="445" y="172" width="190" height="52" rx="7"/><text x="540" y="203" text-anchor="middle" font-size="13">MCP TOOLS</text></g>
+          <g class="mnd mn-d"><rect x="795" y="172" width="190" height="52" rx="7"/><text x="890" y="203" text-anchor="middle" font-size="13">LANGFUSE SESSION</text></g>
+          <line x1="190" y1="224" x2="473" y2="250" class="m-ln" marker-end="url(#mma)"/>
+          <line x1="540" y1="224" x2="540" y2="250" class="m-ln" marker-end="url(#mma)"/>
+          <line x1="890" y1="224" x2="607" y2="250" class="m-ln" marker-end="url(#mma)"/>
+          <g class="mbx"><rect x="400" y="254" width="280" height="58" rx="10"/><text x="540" y="279" class="m-ti" font-size="14" font-weight="700" text-anchor="middle">3 SPECIALIST AGENTS</text><text x="540" y="298" class="m-tf" font-size="9" text-anchor="middle">policy · history · fraud</text></g>
+          <line x1="540" y1="312" x2="540" y2="336" class="m-ln" marker-end="url(#mma)"/>
+          <g class="mnd mn-d"><rect x="440" y="340" width="200" height="36" rx="6"/><text x="540" y="362" text-anchor="middle" font-size="13">DECISION</text></g>
+          <line x1="540" y1="376" x2="540" y2="408" class="m-ln m-dash ln-t" marker-end="url(#mmt)"/>
+          <text x="552" y="396" class="m-tt" font-size="9" text-anchor="start">watches everything</text>
+          <g class="obsbox">
+            <rect x="345" y="412" width="390" height="58" rx="10"/>
+            <rect class="inner" x="352" y="419" width="376" height="44" rx="7"/>
+            <text x="540" y="437" class="m-tt" font-size="15" font-weight="700" text-anchor="middle" letter-spacing="3">OBSERVABILITY</text>
+            <text x="540" y="456" class="m-tf" font-size="8.5" text-anchor="middle">sees every hop · every token · every decision</text>
+          </g>
+          <line x1="430" y1="470" x2="324" y2="496" class="m-ln" marker-end="url(#mma)"/>
+          <line x1="540" y1="470" x2="540" y2="496" class="m-ln" marker-end="url(#mma)"/>
+          <line x1="650" y1="470" x2="756" y2="496" class="m-ln" marker-end="url(#mma)"/>
+          <g class="mnd mn-i"><rect x="245" y="500" width="150" height="34" rx="6"/><text x="320" y="521" text-anchor="middle" font-size="12">TRACES</text></g>
+          <g class="mnd mn-t"><rect x="465" y="500" width="150" height="34" rx="6"/><text x="540" y="521" text-anchor="middle" font-size="12">SCORES</text></g>
+          <g class="mnd mn-e"><rect x="685" y="500" width="150" height="34" rx="6"/><text x="760" y="521" text-anchor="middle" font-size="12">EVALS</text></g>
+          <g class="mnd mn-t"><rect x="880" y="500" width="170" height="34" rx="6"/><text x="965" y="521" text-anchor="middle" font-size="12">IMPROVEMENT</text></g>
+          <line x1="835" y1="517" x2="876" y2="517" class="m-ln ln-t" marker-end="url(#mmt)"/>
+          <path d="M 968 498 C 1068 430 1068 170 672 102" class="m-ln ln-t m-dash" marker-end="url(#mmt)"/>
+          <text x="1054" y="300" transform="rotate(-90 1054 300)" class="m-tt" font-size="9" text-anchor="middle">feeds back</text>
+        </svg>
+      </div>
+    </div>
+    <div class="core"><b>core ▸</b> agent = llm + loop + tools + memory · observability = traces + scores + evals → improvement.</div>
+  </section>
+  <!-- ============ SLIDE 10 · CTA / Q&A ============ -->
+  <section class="slide" data-name="cta" data-dur="1200">
+    <div class="body s10">
+      <div>
+        <div class="kicker" data-rv><span class="k-num">10</span> Closing · Q&amp;A</div>
+        <h1 class="s10-title" data-rv>IF YOU CAN'T<br><span class="hollow">SEE IT</span>, YOU<br>CAN'T <span class="hollow">SHIP IT</span></h1>
+        <div class="s10-sub" data-rv>// open floor — architectural questions · Ashish Patel</div>
+        <div class="contacts" data-rv>
+          <a class="lrow" href="https://www.linkedin.com/in/ashishpatel2604/" target="_blank" rel="noopener">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
+              <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4V8h4v1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="2" y="9" width="4" height="12" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              <circle cx="4" cy="4" r="2" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            <span class="lu"><b>linkedin.com/in/</b>ashishpatel2604</span>
+            <span class="lcta">CONNECT ▸</span>
+          </a>
+        </div>
+        <div class="repo-chips" data-rv>
+          <span class="chip">agents.py</span><span class="chip">mcp_server.py</span><span class="chip">tracing.py</span><span class="chip">seed_evals.py</span>
+        </div>
+      </div>
+      <div class="qrcol" data-rv>
+        <div class="qrframe">
+          <i class="cb"></i><i class="cb"></i><i class="cb"></i><i class="cb"></i>
+          <div id="qrbox"></div>
+        </div>
+        <div class="qr-lbl">scan ▸ <b>connect on LinkedIn</b><br>linkedin.com/in/ashishpatel2604</div>
+      </div>
+    </div>
+    <div class="venue" data-rv>
+      <svg width="13" height="16" viewBox="0 0 13 16" fill="none"><path d="M6.5 15 C6.5 15 12 9 12 5.5 A5.5 5.5 0 1 0 1 5.5 C1 9 6.5 15 6.5 15 Z" stroke-width="1.3"/><circle cx="6.5" cy="5.5" r="2" stroke-width="1.3"/></svg>
+      <span><b>QUEEN'S UNIVERSITY</b> · GIFT CITY · GANDHINAGAR — CLOUD NATIVE DAY, SEPT 5 2026</span>
+    </div>
+  </section>
+  </main>
+  <footer id="chromeBot">
+    <div id="spanLabel">span: <b>session.start</b> · root</div>
+    <div id="wfProg"></div>
+    <div id="navBtns">
+      <button class="nb" id="bPrev" aria-label="previous slide"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M8 1 L3 6 L8 11" stroke-width="1.6"/></svg></button>
+      <button class="nb" id="bNext" aria-label="next slide"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4 1 L9 6 L4 11" stroke-width="1.6"/></svg></button>
+      <span class="hint-k">← → · space · 1-0 jump · t = theme</span>
+    </div>
+  </footer>
+  <div id="hint"><b>→</b> opens span 01 · builds it in 5 steps · <b>← →</b> navigate · <b>1-0</b> jump · <b>t</b> theme</div>
+</div>
+<script>
+/* ============================================================
+   deck engine — the deck is one long trace:
+   slide 00 = root span (session.start) · slides 01-10 = child spans
+   (v2: Meridian Claims content + light/dark theme toggle)
+============================================================ */
+const $  = (s, el=document) => el.querySelector(s);
+const $$ = (s, el=document) => [...el.querySelectorAll(s)];
+const slides = $$('.slide');
+
+/* fixed 1280×720 stage, fitted to viewport */
+const stage = $('#stage');
+function fit(){ const s = Math.min(innerWidth/1280, innerHeight/720);
+  stage.style.transform = `translate(-50%,-50%) scale(${s})`; }
+addEventListener('resize', fit); fit();
+
+/* ---- theme toggle (dark default, light via data-theme on #stage) ---- */
+(function themeInit(){
+  const KEY = 'meridian-deck-theme';
+  const iconSun = '<circle cx="12" cy="12" r="4.5" stroke-width="1.6"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" stroke-width="1.6" stroke-linecap="round"/>';
+  const iconMoon = '<path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z" stroke-width="1.6" stroke-linejoin="round"/>';
+  function apply(theme){
+    if(theme === 'light') stage.setAttribute('data-theme','light');
+    else stage.removeAttribute('data-theme');
+    $('#themeIcon').innerHTML = theme === 'light' ? iconMoon : iconSun;
+  }
+  let saved = 'dark';
+  try{ saved = localStorage.getItem(KEY) || 'dark'; }catch(e){}
+  apply(saved);
+  function toggle(){
+    const cur = stage.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+    const next = cur === 'light' ? 'dark' : 'light';
+    apply(next);
+    try{ localStorage.setItem(KEY, next); }catch(e){}
+  }
+  $('#themeBtn').addEventListener('click', toggle);
+  window.__toggleDeckTheme = toggle;
+})();
+
+/* staggered reveals */
+slides.forEach(sl => $$('[data-rv]', sl).forEach((el,i)=>el.style.setProperty('--i', i)));
+
+/* session trace id + clock */
+$('#sesTrace').textContent = Array.from({length:12},()=> '0123456789abcdef'[Math.random()*16|0]).join('');
+const tickClock = () => $('#clock').textContent = new Date().toISOString().slice(11,19)+' UTC';
+tickClock(); setInterval(tickClock, 1000);
+
+/* ============================================================
+   THE MASTER ARCHITECTURE DIAGRAM — one parametric SVG,
+   cropped / staged / highlighted differently on every slide,
+   re-skinned to Meridian Claims: Supervisor → Policy / Medical
+   History / Fraud specialist agents → MCP-served tools →
+   deterministic Decision Gate → Langfuse observability plane.
+============================================================ */
+let MU=0;
+function masterSVG(o){
+  const uid='mu'+(++MU);
+  const st = o.stage ?? 5, f = o.fade || [], h = o.hide || [];
+  const vis  = (s,e=99)=> (st>=s && st<=e) ? '' : 'm-off';
+  const dim  = k => f.includes(k) ? ' m-dim' : '';
+  const off  = k => h.includes(k) ? ' m-off' : '';
+  const mkd = ['a:#5A6580','ai:#6D5CFF','at:rgba(18,229,180,.85)','ae:#FF5C7A'].map(p=>{
+    const [k,c]=p.split(':');
+    return `<marker id="${uid}-${k}" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="${c}"/></marker>`;
+  }).join('');
+  const ln = (x1,y1,x2,y2,m='a',cls='')=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="m-ln ${cls}" marker-end="url(#${uid}-${m})"/>`;
+  const nd = (x,y,w,hh,label,cls,fs=10)=>`<g class="mnd ${cls}"><rect x="${x}" y="${y}" width="${w}" height="${hh}" rx="5"/><text x="${x+w/2}" y="${y+hh/2+3.5}" text-anchor="middle" font-size="${fs}">${label}</text></g>`;
+  const tx = (x,y,s,c='m-tf',fs=9,an='middle',ex='')=>`<text x="${x}" y="${y}" class="${c}" font-size="${fs}" text-anchor="${an}" ${ex}>${s}</text>`;
+  let s = `<svg viewBox="${o.vb||'0 0 1180 540'}" xmlns="http://www.w3.org/2000/svg"><defs>${mkd}</defs>`;
+  /* ---- CLAIM / USER (stage 1+) ---- */
+  s += `<g data-mg="user" data-s="1" class="${vis(1)}${dim('user')}${off('user')}">`;
+  s += nd(535,8,110,26,'CLAIM','mn-d',10) + ln(590,34,590,46);
+  s += `<g data-s="1" data-e="1" class="${vis(1,1)}">${tx(600,44,'FNOL fields')}</g>`;
+  s += `<g data-s="2" class="${vis(2)}">${tx(600,44,'claim + goal')}</g>`;
+  s += `</g>`;
+  /* ---- LLM (stage 1+) ---- */
+  s += `<g data-mg="llm" data-s="1" class="${vis(1)}${dim('llm')}${off('llm')}">`;
+  s += nd(500,56,180,30,'LLM · qwen2.5:7b','mn-i',10);
+  s += `</g>`;
+  /* stage-1: bare completion arrow */
+  s += `<g data-s="1" data-e="1" class="${vis(1,1)}">${ln(590,86,590,348)}${tx(600,214,'finding')}</g>`;
+  /* ---- AGENT box (stage 2+; becomes SUPERVISOR at stage 4) ---- */
+  s += `<g data-mg="agent" data-mk="sup" data-s="2" class="mbx ${vis(2)}${dim('agent')}${off('agent')}">`;
+  s += `<rect x="455" y="46" width="270" height="76" rx="8"/>`;
+  s += `<g data-s="2" data-e="3" class="${vis(2,3)}">${tx(590,112,'AGENT','m-ti',10)}</g>`;
+  s += `<g data-s="4" class="${vis(4)}">${tx(590,112,'SUPERVISOR AGENT','m-ti',10)}</g>`;
+  s += `<path d="M 730 104 C 770 104 770 58 732 62" class="m-ln ln-i m-dash" marker-end="url(#${uid}-ai)"/>`;
+  s += tx(778,86,'decide → call MCP → observe','m-tf',8.5,'start');
+  s += `</g>`;
+  /* stage-2 finish arrow (straight, no tools yet) */
+  s += `<g data-s="2" data-e="2" class="${vis(2,2)}">${ln(590,122,590,348)}${tx(600,230,'finish')}</g>`;
+  /* ---- branch / handoff arrows (stage 3+) ---- */
+  s += `<g data-mg="arrows" data-s="3" class="${vis(3)}${dim('arrows')}${off('arrows')}">`;
+  s += ln(515,122,277,154) + ln(590,122,590,154) + ln(665,122,903,154);
+  s += `<g data-s="4" class="${vis(4)}">${tx(360,131,'sequential','m-ti',8)}${tx(598,140,'sequential','m-ti',8,'start')}${tx(800,131,'sequential','m-ti',8)}</g>`;
+  s += `</g>`;
+  /* ---- single-agent MCP tool + observation loop (stage 3 only) ---- */
+  s += `<g data-mg="tools" data-s="3" data-e="3" class="${vis(3,3)}${dim('tools')}${off('tools')}">`;
+  s += nd(185,156,170,34,'mcp.check_coverage','mn-t',9.5);
+  s += nd(505,156,170,34,'MCP server (stdio)','mn-t',9.5);
+  s += nd(825,156,170,34,'mcp.fraud_score','mn-t',9.5);
+  s += `<path d="M 185 173 L 130 173 L 130 106 L 449 106" class="m-ln ln-t m-dash" marker-end="url(#${uid}-at)"/>`;
+  s += `<text x="122" y="245" transform="rotate(-90 122 245)" class="m-tt" font-size="8.5" text-anchor="middle">observe → decide again</text>`;
+  s += `<path d="M 690 122 C 805 170 805 300 600 348" class="m-ln m-dash" marker-end="url(#${uid}-a)"/>`;
+  s += tx(812,242,'finish?');
+  s += `</g>`;
+  /* ---- session/user tagging (stage 3+) ---- */
+  s += `<g data-mg="memory" data-s="3" class="${vis(3)}${dim('memory')}${off('memory')}">`;
+  s += nd(300,60,140,30,'LANGFUSE SESSION','mn-d',8.5);
+  s += `<line x1="455" y1="75" x2="440" y2="75" class="m-ln"/>`;
+  s += `</g>`;
+  /* ---- multi-agent (stage 4+): 3 specialists, MCP tools, decision gate ---- */
+  s += `<g data-mg="multi" data-s="4" class="${vis(4)}${dim('multi')}${off('multi')}">`;
+  const col = (cx,name,tag,mk)=>`<g data-mk="${mk}"><rect class="mbx2r" x="${cx-100}" y="156" width="200" height="78" rx="8"/><text x="${cx}" y="171" class="m-ti" font-size="9.5" text-anchor="middle">${name}</text>${nd(cx-45,178,90,22,'llm','mn-i',9)}${nd(cx-70,204,140,22,tag,'mn-t',8.5)}</g>`;
+  s += col(270,'POLICY VERIFICATION','check_coverage','policy');
+  s += col(590,'MEDICAL HISTORY','lookup_history','history');
+  s += col(910,'FRAUD / EXCEPTION','fraud_score','fraud');
+  const res = (cx,label,mk)=>`<g data-mk="${mk}">${nd(cx-70,248,140,26,label,'mn-t',9)}${ln(cx,234,cx,246)}</g>`;
+  s += res(270,'policy table','policytbl') + res(590,'patient history','histtbl') + res(910,'fraud signals','fraudtbl');
+  s += `<g data-mk="gate"><rect class="mbxcr" x="490" y="294" width="200" height="44" rx="8"/><text x="590" y="312" class="m-tt" font-size="10" text-anchor="middle">DECISION GATE</text><text x="590" y="328" class="m-tf" font-size="8" text-anchor="middle">deterministic · not an llm call</text></g>`;
+  s += ln(270,274,540,294) + ln(590,274,590,292) + ln(910,274,640,294);
+  s += ln(590,338,590,348);
+  s += `</g>`;
+  /* ---- DECISION (stage 1+) ---- */
+  s += `<g data-mg="response" data-s="1" class="${vis(1)}${dim('response')}${off('response')}">`;
+  s += nd(495,350,190,28,'APPROVE · DENY · REVIEW','mn-d',9.5);
+  s += `</g>`;
+  /* ---- observability plane (stage 5) ---- */
+  s += `<g data-mg="obs" data-s="5" class="${vis(5)}${dim('obs')}${off('obs')}">`;
+  s += `<line x1="40" y1="392" x2="1140" y2="392" class="m-sep"/>`;
+  s += `<rect x="470" y="384" width="240" height="16" rx="3" class="m-lblbg"/>`;
+  s += tx(590,396,'OBSERVABILITY PLANE · LANGFUSE','m-td',8.5,'middle','letter-spacing="1.5"');
+  s += `<line x1="60" y1="424" x2="1112" y2="424" class="m-ln ln-i" marker-end="url(#${uid}-ai)"/>`;
+  s += tx(60,414,'session_id = claim_id CLM-9001','m-ti',10,'start');
+  s += `<rect x="60" y="432" width="1000" height="12" rx="2" class="seg-root"/>`;
+  s += tx(66,441,'policy.run + history.run + fraud.run · 4.9 s · 14 spans','m-ti',8,'start');
+  [[60,128,'i'],[190,12,'i'],[204,44,'t'],[250,12,'i'],[264,236,'a'],[502,12,'i'],[518,184,'i'],[704,68,'e'],[774,286,'i']]
+    .forEach(([x,w,k])=>s+=`<rect x="${x}" y="448" width="${w}" height="16" rx="2" class="seg-${k}"/>`);
+  [[124,'llm.decide .9s'],[226,'mcp.check_coverage .4s'],[382,'mcp.lookup_history .6s'],[610,'mcp.fraud_score .5s'],[738,'score.groundedness 1.6s'],[917,'decision_gate .02s']]
+    .forEach(([x,t])=>s+=tx(x,477,t,'m-td',8));
+  let cx0=60;
+  [['tokens 940',80,'d'],['latency 4.9 s',94,'d'],['cost $0.00',86,'d'],['errors 0',66,'e'],['groundedness 1.0 ✓',126,'t']]
+    .forEach(([t,w,k])=>{ s+=`<rect x="${cx0}" y="498" width="${w}" height="24" rx="3" class="mchip mchip-${k}"/>`+tx(cx0+w/2,513,t,`mcx-${k}`,9); cx0+=w+12; });
+  s += tx(1120,513,'one session = the whole claim','m-tf',9,'end');
+  s += `</g>`;
+  /* zone frames (slide 5: the four lenses mapped onto the picture) */
+  if(o.zones){
+    s += `<g><rect x="185" y="240" width="810" height="42" rx="6" class="zn zn-t"/>`
+       + `<rect x="498" y="48" width="184" height="46" rx="8" class="zn zn-i"/>`
+       + `<rect x="250" y="124" width="680" height="30" rx="6" class="zn zn-a"/>`
+       + `<rect x="48" y="492" width="560" height="36" rx="6" class="zn zn-e"/></g>`;
+  }
+  /* plane emphasis frame (slide 7) */
+  if(o.plane) s += `<rect x="44" y="382" width="1092" height="150" rx="8" class="zn zn-i" style="stroke-width:1.2"/>`;
+  if(o.extra) s += o.extra;
+  /* slide-specific overlays (badges, brackets) */
+  s += `</svg>`;
+  return s;
+}
+/* slide 2 overlays: the "everything looks fine but wrong" stamps */
+const M2X = `<g><rect x="742" y="28" width="150" height="20" rx="3" class="ovl-e"/><text x="817" y="42" class="m-te" font-size="9" text-anchor="middle">✗ missed exclusion</text><rect x="1002" y="148" width="130" height="20" rx="3" class="ovl-e"/><text x="1067" y="162" class="m-te" font-size="9" text-anchor="middle">tool called ✓ — still wrong</text><text x="690" y="344" class="m-te" font-size="9" text-anchor="start">✗ wrong decision — confident, useless</text><text x="690" y="372" class="m-tt" font-size="15" font-weight="700" text-anchor="start">HTTP/1.1 200 OK</text></g>`;
+/* slide 3 overlay: the eval bracket around the response */
+const M3X = `<g data-mg="evalzone"><rect x="493" y="316" width="204" height="68" rx="6" class="zn zn-t"/><text x="595" y="310" class="m-tt" font-size="9" text-anchor="middle">score · groundedness 1.0 ✓</text></g>`;
+/* slide 8 ring: generate node/arc geometry */
+(function ring(){
+  const cx=230, cy=224, R=160;
+  const words=['PRODUCE','TRACE','DETECT','DATASET','EVAL','FIX','REGRESSION','DEPLOY'];
+  const pt=(a,rad)=>[cx+rad*Math.cos(a), cy+rad*Math.sin(a)];
+  let p = `<defs><marker id="rga" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#5A6580"/></marker></defs>`;
+  p += `<circle cx="${cx}" cy="${cy}" r="${R}" class="rg-base"/>`;
+  p += `<circle cx="${cx}" cy="${cy}" r="${R+26}" class="rg-rot"/>`;
+  for(let k=0;k<8;k++){
+    const a1=-Math.PI/2+k*Math.PI/4+0.34, a2=-Math.PI/2+(k+1)*Math.PI/4-0.34;
+    const [x1,y1]=pt(a1,R),[x2,y2]=pt(a2,R);
+    p += `<path d="M ${x1.toFixed(1)} ${y1.toFixed(1)} A ${R} ${R} 0 0 1 ${x2.toFixed(1)} ${y2.toFixed(1)}" class="rg-arc" marker-end="url(#rga)"/>`;
+  }
+  words.forEach((w,k)=>{
+    const a=-Math.PI/2+k*Math.PI/4, [x,y]=pt(a,R), [lx,ly]=pt(a,R+52);
+    const anc = Math.cos(a)>0.35?'end':(Math.cos(a)<-0.35?'start':'middle');
+    p += `<g class="rg-n" data-k="${k}"><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="26"/><text x="${x.toFixed(1)}" y="${(y+4.5).toFixed(1)}" text-anchor="middle" class="rg-num">${String(k+1).padStart(2,'0')}</text></g>`;
+    p += `<text x="${lx.toFixed(1)}" y="${(ly+3).toFixed(1)}" text-anchor="${anc}" class="rg-lb">${w}</text>`;
+  });
+  $('#ringwrap').innerHTML = `<svg viewBox="0 0 460 448">${p}</svg><div class="rg-c"><div><div id="m8" class="mst"></div><span>the system under improvement</span></div></div>`;
+})();
+/* inject the master diagram everywhere (each instance = crop + stage) */
+[
+  {sel:'#m1', stage:1},
+  {sel:'#m2', stage:3, vb:'90 0 1010 385', hide:['memory'], extra:M2X},
+  {sel:'#m3', stage:3, vb:'100 0 950 385', extra:M3X},
+  {sel:'#m4', stage:4, vb:'40 0 1100 385'},
+  {sel:'#m5', stage:5, vb:'0 0 1180 540', zones:true},
+  {sel:'#m6', stage:5, vb:'0 0 1180 540'},
+  {sel:'#m7', stage:5, vb:'0 0 1180 540', plane:true},
+  {sel:'#m8', stage:4, vb:'150 0 880 380'},
+].forEach(o=>{ const el=$(o.sel); if(el) el.innerHTML = masterSVG(o); });
+
+/* ============================================================
+   SLIDE 00 · typed "session boot" terminal (replays on entry)
+============================================================ */
+const bootTerm = (function(){
+  const el = $('#bootLog');
+  if(!el) return function(){};
+  let tok = 0;
+  return function(){
+    const my = ++tok;
+    el.innerHTML = '';
+    const sid = $('#sesTrace').textContent || '7f3d9a41c2e8';
+    const cmd = '$ obs-cli session open --event cnd-gandhinagar-2026';
+    const meta = [
+      [`✓ session ${sid} · root span attached`, 'ok'],
+      ['  speaker   ashish.patel · oracle', 'dimc'],
+      ['  role      sr principal architect — ai / ml / ds', 'dimc'],
+      ['  demo      meridian claims · claims adjudication', 'hl'],
+      ['  track     advanced devops &amp; infrastructure', 'dimc'],
+      ["  venue     queen's university · gift city · gandhinagar", 'dimc'],
+      ['  budget    45:00 · 12 spans queued', 'dimc'],
+    ];
+    const cmdEl = document.createElement('div'); cmdEl.className='bl cm';
+    el.appendChild(cmdEl);
+    let ci = 0, mi = 0;
+    const typeChar = () => {
+      if(my !== tok) return;
+      cmdEl.textContent = cmd.slice(0, ++ci);
+      if(ci < cmd.length) setTimeout(typeChar, 16);
+      else setTimeout(metaStep, 260);
+    };
+    const metaStep = () => {
+      if(my !== tok) return;
+      if(mi < meta.length){
+        const d = document.createElement('div');
+        d.className = 'bl ' + meta[mi][1];
+        d.innerHTML = meta[mi][0];
+        el.appendChild(d); mi++;
+        setTimeout(metaStep, 290);
+      } else {
+        const r = document.createElement('div');
+        r.className = 'bl hl';
+        r.innerHTML = 'ready ▸ press → to open span 01 ';
+        const c = document.createElement('span'); c.className = 'tcur';
+        r.appendChild(c); el.appendChild(r);
+      }
+    };
+    setTimeout(typeChar, 450);
+  };
+})();
+
+/* ============================================================
+   SLIDE 00 · talk.preview — this deck rendered as one trace
+   (segments generated from the real slide durations, clickable)
+============================================================ */
+(function prevBar(){
+  const bar = $('#ptBar'), lbls = $('#ptLbls');
+  if(!bar || !lbls) return;
+  const ds = slides.map(s=>+s.dataset.dur);
+  const tot = ds.reduce((a,b)=>a+b,0);
+  let acc = 0; const centers = [];
+  slides.forEach((sl,i)=>{
+    const w = ds[i]/tot*100;
+    const d = document.createElement('i');
+    d.className = 'pt-seg' + (i===1?' big':'') + (i===slides.length-1?' last':'');
+    d.style.left = acc+'%';
+    d.style.width = `calc(${w}% - 1.5px)`;
+    d.title = `${String(i).padStart(2,'0')} ${sl.dataset.name} · ${ds[i]}ms`;
+    d.addEventListener('click', ()=>go(i));
+    bar.appendChild(d);
+    centers.push(acc + w/2);
+    acc += w;
+  });
+  [[1,'how-agents-work'],[7,'production-arch'],[12,'cta']].forEach(([i,n])=>{
+    const l = document.createElement('span');
+    l.className = 'pt-l';
+    l.style.left = centers[i]+'%';
+    l.textContent = `${String(i).padStart(2,'0')} ${n}`;
+    lbls.appendChild(l);
+  });
+})();
+
+/* ============================================================
+   navigation + slide-01 stage engine (progressive reveal)
+============================================================ */
+const durs = slides.map(s=>+s.dataset.dur);
+const total = durs.reduce((a,b)=>a+b,0);
+const prog = $('#wfProg');
+let acc2=0;
+const segs = slides.map((sl,i)=>{
+  const left=acc2/total*100, w=durs[i]/total*100-.55; acc2+=durs[i];
+  const b=document.createElement('button');
+  b.className='seg'; b.style.left=left+'%'; b.style.width=w+'%';
+  b.title=`${String(i).padStart(2,'0')} ${sl.dataset.name} · ${durs[i]}ms`;
+  b.addEventListener('click',()=>go(i));
+  prog.appendChild(b); return b;
+});
+const segName=document.createElement('div'); segName.className='seg-name'; prog.appendChild(segName);
+const MAXST=5;
+let cur=-1, stg=1;
+const BUILD=1;   /* index of the 5-stage mental-model slide */
+const CAPS = [
+  '① an <b>LLM</b> — text in, text out. no state · no tools · no decisions.',
+  '② an <b>agent</b> — the LLM wrapped in a control loop: understand → decide → act → observe.',
+  '③ <b>agent = LLM + control loop + MCP tools + session state</b> — now it can touch real systems, and loop.',
+  '④ one agent becomes <b>three specialists + a deterministic decision gate</b> — a distributed system is born.',
+  '⑤ <b>one Langfuse session</b> spans the whole claim — spans + scores reconstruct the story.'
+];
+function updateStage(cont, n){
+  $$('[data-s]', cont).forEach(el=>{
+    const s=+el.dataset.s, e=+(el.dataset.e||99);
+    el.classList.toggle('m-off', !(n>=s && n<=e));
+  });
+}
+function setStage(n){
+  stg=Math.max(1,Math.min(MAXST,n));
+  updateStage($('#m1'), stg);
+  const cap=$('#s1cap'); cap.style.opacity=0;
+  setTimeout(()=>{ cap.innerHTML=CAPS[stg-1]; cap.style.opacity=1; },160);
+  $$('#s1steps button').forEach(b=>{
+    const k=+b.dataset.st;
+    b.classList.toggle('act',k===stg); b.classList.toggle('past',k<stg);
+  });
+  $('#spanLabel').innerHTML = stg<MAXST
+    ? `span: <b>how-agents-work</b> · stage ${stg}/5`
+    : `span: <b>how-agents-work</b> · complete · 3200ms`;
+}
+function go(i, dir=0){
+  i=Math.max(0,Math.min(slides.length-1,i)); if(i===cur) return;
+  if(cur>=0){ const p=slides[cur]; p.classList.remove('on'); p.classList.add('out');
+    setTimeout(()=>p.classList.remove('out'),480); }
+  requestAnimationFrame(()=>slides[i].classList.add('on'));
+  cur=i;
+  if(i===BUILD) setStage(dir>0 ? 1 : MAXST);   /* fresh build entering forward · finished picture coming back */
+  if(i===0) bootTerm();                        /* replay the session boot on the root span */
+  segs.forEach((s,k)=>{ s.classList.toggle('past',k<i); s.classList.toggle('cur',k===i); });
+  segName.textContent=slides[i].dataset.name;
+  segName.style.left=(segs[i].offsetLeft+segs[i].offsetWidth/2)+'px';
+  $('#slideNum').textContent=String(i).padStart(2,'0')+' / '+String(slides.length-1).padStart(2,'0');
+  if(i===0) $('#spanLabel').innerHTML='span: <b>session.start</b> · root';
+  else if(i!==BUILD) $('#spanLabel').innerHTML=`span: <b>${slides[i].dataset.name}</b> · ${slides[i].dataset.dur}ms`;
+}
+function next(){ if(cur===BUILD && stg<MAXST) setStage(stg+1); else go(cur+1,1); }
+function prev(){ if(cur===BUILD && stg>1) setStage(stg-1); else go(cur-1,-1); }
+$('#bPrev').addEventListener('click',prev); $('#bNext').addEventListener('click',next);
+$$('#s1steps button').forEach(b=>b.addEventListener('click',()=>setStage(+b.dataset.st)));
+addEventListener('keydown',e=>{
+  if(/SELECT|INPUT|TEXTAREA/.test(e.target.tagName)) return;
+  const k=e.key;
+  if(k==='ArrowRight'||k===' '||k==='PageDown'||k==='ArrowDown'){ e.preventDefault(); next(); }
+  else if(k==='ArrowLeft'||k==='PageUp'||k==='ArrowUp'){ e.preventDefault(); prev(); }
+  else if(k==='Home') go(0); else if(k==='End') go(slides.length-1);
+  else if(k==='t'||k==='T') window.__toggleDeckTheme();
+  else if(/^[1-9]$/.test(k)) go(+k);       /* 1-9 → spans 01-09 */
+  else if(k==='0') go(slides.length-1);    /* 0 → final span    */
+});
+let txs=null;
+addEventListener('touchstart',e=>txs=e.touches[0].clientX,{passive:true});
+addEventListener('touchend',e=>{
+  if(txs===null) return; const dx=e.changedTouches[0].clientX-txs;
+  if(dx<-60) next(); else if(dx>60) prev(); txs=null;
+},{passive:true});
+go(0); setStage(1);        /* boot: open the root span, prep the build slide at stage 1 */
+setTimeout(()=>$('#hint').classList.add('bye'),8000);
+
+/* ============================================================
+   slide 03 · hover a span → highlight where it lives
+============================================================ */
+(function(){
+  const m3=$('#m3');
+  const dimM=(keep)=>{
+    const svg=m3.querySelector('svg'); if(!svg) return;
+    svg.querySelectorAll(':scope > g[data-mg]').forEach(g=>
+      g.classList.toggle('m-dim', !keep.includes(g.dataset.mg)));
+  };
+  $$('.trow').forEach(r=>{
+    const keys=r.dataset.t.split('|');
+    r.addEventListener('mouseenter',()=>dimM(keys));
+    r.addEventListener('mouseleave',()=>dimM([]));
+  });
+})();
+
+/* ============================================================
+   slide 04 · failure propagation, auto-replaying with live trace
+   (re-skinned: real Meridian Claims failure — a fraud MCP call
+   that times out, decision gate still reaches human_review,
+   audit trail shows the gap — see PRD §5 / this project's own
+   run_evals.py history for the real version of this story)
+============================================================ */
+(function(){
+  const cont=$('#m4'), log=$('#s4log');
+  const steps=[
+    ['sup','k-hl','supervisor ▸ sequential step 1: policy · span open',''],
+    ['policy','k-ok','✓ policy.llm ▸ mcp.check_coverage → covered:true','ok'],
+    ['history','k-hl','history.llm ▸ plan: call lookup_medical_history',''],
+    ['fraud','k-err','✗ fraud.llm ▸ mcp.fraud_score timed out · no signal','err'],
+    ['gate','k-warn','decision_gate ▸ no fraud signal ⇒ conservative: REVIEW','warn'],
+    ['sup','k-hl','supervisor ▸ claim CLM-9004 routed to adjuster',''],
+    ['gate','k-ok','✓ audit trail ▸ shows the missing finding — nothing hidden','ok'],
+  ];
+  let cyc=0, tms=[];
+  const clear=()=>{ tms.forEach(clearTimeout); tms=[];
+    $$('[data-mk]',cont).forEach(g=>g.classList.remove('k-err','k-hl','k-warn','k-ok')); };
+  function run(){
+    clear(); log.innerHTML=''; cyc++;
+    $('#s4cy').textContent=cyc;
+    steps.forEach((st,i)=>tms.push(setTimeout(()=>{
+      const g=cont.querySelector(`[data-mk="${st[0]}"]`);
+      if(g){ g.classList.remove('k-err','k-hl','k-warn','k-ok'); g.classList.add(st[1]); }
+      const d=document.createElement('div'); d.className='slg '+st[3];
+      d.innerHTML=`<span class="ts">${String(i+1).padStart(2,'0')}</span>${st[2]}`;
+      log.appendChild(d);
+    }, 600+i*1250)));
+    tms.push(setTimeout(run, 600+steps.length*1250+3800));
+  }
+  run();
+})();
+
+/* ============================================================
+   slide 08 · auto-cycling loop phases
+============================================================ */
+(function(){
+  const nodes=$$('#ringwrap .rg-n'); let k=0;
+  const set=n=>nodes.forEach(g=>g.classList.toggle('act',+g.dataset.k===n));
+  set(0);
+  setInterval(()=>{ k=(k+1)%8; set(k); },1900);
+})();
+
+/* ============================================================
+   slide 10 · QR → LinkedIn profile
+   (v2: fallback shows a plain readable URL instead of a
+   fake-looking dot pattern, so a CDN failure at the venue
+   never presents as a broken-but-real-looking QR code)
+============================================================ */
+(function(){
+  const QR_URL='https://www.linkedin.com/in/ashishpatel2604/';
+  const box=$('#qrbox');
+  function fallback(){
+    box.innerHTML = `<div class="qr-fallback-url">QR unavailable offline —<br><b>linkedin.com/in/ashishpatel2604</b></div>`;
+  }
+  function init(){
+    if(!window.qrcode){ fallback(); return; }
+    try{
+      const q=qrcode(0,'M'); q.addData(QR_URL); q.make();
+      box.innerHTML=q.createSvgTag(3,0);
+      const svg=box.firstElementChild;
+      const w=+svg.getAttribute('width')||63, h=+svg.getAttribute('height')||63;
+      svg.setAttribute('viewBox',`0 0 ${w} ${h}`);
+      svg.removeAttribute('width'); svg.removeAttribute('height');
+      svg.style.background = 'var(--panel)';
+      /* first rect is the qrcode library's own background square — keep it
+         panel-colored (not ink) or it paints the same color as the modules
+         and the whole code disappears into one solid block. */
+      const kids = [...svg.children];
+      kids.forEach((p,i)=>{
+        if(i===0 && p.tagName==='rect'){ p.setAttribute('fill','var(--panel)'); return; }
+        p.setAttribute('fill','var(--ink)'); p.removeAttribute('stroke');
+      });
+    }catch(e){ fallback(); }
+  }
+  document.readyState==='loading' ? addEventListener('DOMContentLoaded',init) : init();
+})();
+</script></body></html>
