@@ -1,8 +1,51 @@
-# Meridian Claims — Multi-Agent Observability Demo
+# Meridian Claims — Multi-Agent LLM Observability Demo
 
-A real health-insurance claims-adjudication system: three CrewAI agents (Policy Verification, Medical History, Fraud/Exception) call MCP-served tools, a deterministic decision gate approves/denies/routes each claim, and every step is traced live in Langfuse. Built to teach how multi-agent observability actually works — live, running, no mocks pretending to be a product. Full design/rationale: [PRD.md](PRD.md). Speaker script for the companion talk: [presentation/SPEAKER_SCRIPT.md](presentation/SPEAKER_SCRIPT.md).
+**A real, running health-insurance claims-adjudication system built to demonstrate what production-grade multi-agent observability actually looks like — not a toy example.** Three CrewAI agents (Policy Verification, Medical History, Fraud/Exception) call tools through MCP, a deterministic decision gate approves/denies/routes each claim, and every step — every LLM call, every tool call, every score — is traced live in Langfuse Cloud. No mocks pretending to be a product, no Docker required. Full design/rationale: [PRD.md](PRD.md). Speaker script for the companion conference talk: [presentation/SPEAKER_SCRIPT.md](presentation/SPEAKER_SCRIPT.md).
+
+**Topics:** `llm-observability` `multi-agent-systems` `ai-agents` `crewai` `langfuse` `mcp` `model-context-protocol` `fastapi` `nextjs` `llmops` `agentic-ai` `enterprise-ai` `python` `typescript`
 
 ## Architecture
+
+```mermaid
+flowchart TB
+    subgraph portal["Meridian Claims Portal — Next.js + shadcn/ui"]
+        A1["Claims queue"]
+        A2["New claim — FNOL form"]
+        A3["Claim detail — audit trail + live thinking widget"]
+        A4["Global activity drawer"]
+        A5["Eval dashboard"]
+    end
+
+    portal <-->|"REST: /claims, /claims/{id}, /evals<br/>SSE: /claims/{id}/events, /activity/stream"| backend
+
+    subgraph backend["FastAPI Backend (uv)"]
+        B1["Runs claims pipeline sequentially"]
+        B2["Persists claims + findings to SQLite"]
+    end
+
+    backend --> crew
+
+    subgraph crew["CrewAI Crew — sequential process"]
+        direction LR
+        C1["Policy Verification<br/>(check_coverage)"] --> C2["Medical History<br/>(lookup_medical_history)"] --> C3["Fraud / Exception<br/>(fraud_score)"] --> C4["Decision Gate<br/>(deterministic)"]
+    end
+
+    C1 -.-> mcp
+    C2 -.-> mcp
+    C3 -.-> mcp
+
+    mcp["MCP Server (stdio)<br/>check_coverage · lookup_medical_history · fraud_score"]
+
+    crew -->|"LLM calls via LiteLLM"| ollama["Ollama (local, primary)<br/>qwen2.5:7b"]
+    crew -.->|"fallback"| openrouter["OpenRouter<br/>(free tier)"]
+
+    crew -->|"Tracing · Sessions · Users<br/>Datasets · Scores"| langfuse["Langfuse Cloud<br/>(via OpenInference/OTel)"]
+
+    style langfuse fill:#12E5B4,color:#0A0C11
+    style mcp fill:#6D5CFF,color:#fff
+```
+
+Also as ASCII, for terminals/plain-text viewers:
 
 ```
 ┌──────────────────────────┐   REST /claims, /claims/{id}, /evals   ┌───────────────────────────┐

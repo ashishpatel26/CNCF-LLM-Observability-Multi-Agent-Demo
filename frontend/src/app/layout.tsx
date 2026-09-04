@@ -30,6 +30,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${plexSans.variable} ${plexMono.variable} ${sourceSerif.variable} h-full antialiased`}
     >
       <body className="min-h-full bg-background">
