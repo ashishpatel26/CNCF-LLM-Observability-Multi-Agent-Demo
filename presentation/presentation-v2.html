@@ -852,8 +852,8 @@ addEventListener('resize', fit); fit();
     else stage.removeAttribute('data-theme');
     $('#themeIcon').innerHTML = theme === 'light' ? iconMoon : iconSun;
   }
-  let saved = 'dark';
-  try{ saved = localStorage.getItem(KEY) || 'dark'; }catch(e){}
+  let saved = 'light';
+  try{ saved = localStorage.getItem(KEY) || 'light'; }catch(e){}
   apply(saved);
   function toggle(){
     const cur = stage.getAttribute('data-theme') === 'light' ? 'light' : 'dark';

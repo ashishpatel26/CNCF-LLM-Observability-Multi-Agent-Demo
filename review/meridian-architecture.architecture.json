@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Meridian Claims — System Architecture",
+    "output": "meridian-architecture.html",
+    "quality_profile": "showcase",
+    "views": [
+      { "id": "claim-lifecycle", "label": "Claim lifecycle", "focus": ["portal", "api", "policy_agent", "mcp", "sqlite"], "note": "A filed claim flows from the portal through the backend into the agent crew, then MCP tools, then SQLite." },
+      { "id": "agent-pipeline", "label": "Agent pipeline", "focus": ["policy_agent", "medical_agent", "fraud_agent", "gate", "mcp"], "note": "Three specialist agents each call one MCP tool in sequence; a deterministic gate combines their findings." },
+      { "id": "observability", "label": "Observability plane", "focus": ["mcp", "gate", "langfuse"], "note": "Every LLM and tool call traces to Langfuse as one Session per claim, with a groundedness Score per finding." }
+    ]
+  },
+  "components": [
+    { "id": "adjuster", "type": "external", "label": "Claims Adjuster", "sublabel": "browser", "pos": [40, 220], "size": [130, 60] },
+    { "id": "portal", "type": "frontend", "label": "Meridian Portal", "sublabel": "Next.js + shadcn/ui", "pos": [250, 220], "size": [150, 64], "tag": "queue · FNOL · audit trail" },
+    { "id": "api", "type": "backend", "label": "FastAPI Backend", "sublabel": "uv · :8000", "pos": [480, 220], "size": [150, 64] },
+    { "id": "sqlite", "type": "database", "label": "SQLite", "sublabel": "claims · findings · activity", "pos": [480, 420], "size": [150, 60] },
+    { "id": "policy_agent", "type": "backend", "label": "Policy Verification", "sublabel": "check_coverage", "pos": [750, 50], "size": [170, 60] },
+    { "id": "medical_agent", "type": "backend", "label": "Medical History", "sublabel": "lookup_medical_history", "pos": [750, 170], "size": [170, 60] },
+    { "id": "fraud_agent", "type": "backend", "label": "Fraud / Exception", "sublabel": "fraud_score", "pos": [750, 290], "size": [170, 60] },
+    { "id": "gate", "type": "backend", "label": "Decision Gate", "sublabel": "deterministic", "pos": [750, 410], "size": [170, 60] },
+    { "id": "mcp", "type": "backend", "label": "MCP Server", "sublabel": "stdio tools", "pos": [1040, 170], "size": [160, 60] },
+    { "id": "ollama", "type": "cloud", "label": "Ollama", "sublabel": "qwen2.5:7b, local", "pos": [1040, 50], "size": [160, 60] },
+    { "id": "openrouter", "type": "external", "label": "OpenRouter", "sublabel": "free-tier fallback", "pos": [1040, 290], "size": [160, 60] },
+    { "id": "langfuse", "type": "cloud", "label": "Langfuse Cloud", "sublabel": "traces · sessions · scores", "pos": [1040, 410], "size": [180, 64], "tag": "OpenInference/OTel" }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "Claims pipeline", "wraps": ["policy_agent", "medical_agent", "fraud_agent", "gate"] },
+    { "kind": "security-group", "label": "Tool + model boundary", "wraps": ["mcp", "ollama", "openrouter"] }
+  ],
+  "connections": [
+    { "id": "adjuster-portal", "from": "adjuster", "to": "portal", "label": "HTTPS", "variant": "emphasis" },
+    { "id": "portal-api", "from": "portal", "to": "api", "label": "REST + SSE" },
+    { "id": "api-sqlite", "from": "api", "to": "sqlite", "label": "persists claims", "labelAt": [555, 408] },
+    { "id": "api-policy", "from": "api", "to": "policy_agent", "label": "run_claim(), sequential" },
+    { "id": "policy-medical", "from": "policy_agent", "to": "medical_agent" },
+    { "id": "medical-fraud", "from": "medical_agent", "to": "fraud_agent" },
+    { "id": "fraud-gate", "from": "fraud_agent", "to": "gate", "label": "findings", "labelAt": [835, 406] },
+    { "id": "gate-sqlite", "from": "gate", "to": "sqlite", "label": "decision" },
+    { "id": "policy-mcp", "from": "policy_agent", "to": "mcp", "label": "check_coverage", "variant": "dashed" },
+    { "id": "medical-mcp", "from": "medical_agent", "to": "mcp", "label": "lookup_history", "variant": "dashed", "labelAt": [910, 286] },
+    { "id": "fraud-mcp", "from": "fraud_agent", "to": "mcp", "label": "fraud_score", "variant": "dashed" },
+    { "id": "mcp-ollama", "from": "mcp", "to": "ollama", "label": "LLM calls, primary", "variant": "emphasis" },
+    { "id": "mcp-openrouter", "from": "mcp", "to": "openrouter", "label": "fallback", "variant": "dashed", "labelAt": [1120, 286] },
+    { "id": "gate-langfuse", "from": "gate", "to": "langfuse", "label": "trace + score per claim" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "Portal", "items": ["Next.js + shadcn/ui claims-ops portal", "Live SSE activity via floating widget + audit trail"] },
+    { "dot": "emerald", "title": "Agent pipeline", "items": ["CrewAI sequential process: Policy → Medical History → Fraud", "Deterministic decision gate, not LLM phrasing"] },
+    { "dot": "amber", "title": "Tools + model", "items": ["MCP server (stdio) exposes 3 mock claim-systems tools", "Ollama local primary, OpenRouter free-tier fallback"] },
+    { "dot": "rose", "title": "Observability", "items": ["Every LLM + tool call traced via OpenInference/OTel", "One Langfuse Session per claim, groundedness Score per finding"] }
+  ]
+}

@@ -2,8 +2,12 @@
 uv run python -m src.seed_evals
 """
 
-from src.mcp_server import SEED_CLAIMS
-from src.tracing import langfuse
+from dotenv import load_dotenv
+
+load_dotenv()
+
+from src.mcp_server import SEED_CLAIMS  # noqa: E402
+from src.tracing import langfuse  # noqa: E402
 
 DATASET_NAME = "claims-eval-v1"
 
