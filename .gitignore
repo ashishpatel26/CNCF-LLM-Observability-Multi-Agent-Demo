@@ -1,0 +1,27 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Secrets
+.env
+
+# App data
+studio.db
+*.log
+*.pid
+
+# Frontend (has its own .gitignore too)
+frontend/node_modules
+frontend/.next
+frontend/.env.local
+
+# Playwright test artifacts
+.playwright-mcp/
+.claude/
