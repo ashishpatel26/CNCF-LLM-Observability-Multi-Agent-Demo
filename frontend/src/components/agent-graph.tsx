@@ -3,44 +3,45 @@
 import { cn } from "@/lib/utils";
 
 const AGENTS = [
-  { key: "research", label: "Research Agent", tool: "vector_search" },
-  { key: "infra", label: "Infra Agent", tool: "k8s_status" },
-  { key: "support", label: "Support Agent", tool: "ticket_lookup" },
+  { key: "research", label: "Research", tool: "Searches internal docs", color: "bg-agent-research" },
+  { key: "infra", label: "Infra", tool: "Checks deployment health", color: "bg-agent-infra" },
+  { key: "support", label: "Support", tool: "Looks up tickets", color: "bg-agent-support" },
 ];
 
-export function AgentGraph({ activeAgent, status }: { activeAgent: string | null; status: "idle" | "running" | "done" }) {
+export function AgentGraph({
+  activeAgent,
+  status,
+}: {
+  activeAgent: string | null;
+  status: "idle" | "running" | "done";
+}) {
   return (
-    <div className="flex flex-col items-center gap-4 py-6">
-      <div
-        className={cn(
-          "rounded-lg border px-4 py-2 text-sm font-medium transition-colors",
-          status === "running" ? "border-blue-500 bg-blue-50 text-blue-700" : "border-border bg-muted",
-        )}
-      >
-        Supervisor
-      </div>
-      <div className="h-6 w-px bg-border" />
-      <div className="flex gap-4">
-        {AGENTS.map((a) => {
-          const isActive = activeAgent === a.key;
-          return (
-            <div
-              key={a.key}
+    <div className="flex items-center gap-2 overflow-x-auto">
+      {AGENTS.map((a) => {
+        const isActive = activeAgent === a.key;
+        const isRunning = isActive && status === "running";
+        return (
+          <div
+            key={a.key}
+            className={cn(
+              "flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-all",
+              isActive
+                ? "border-transparent bg-secondary text-foreground"
+                : "border-border text-muted-foreground",
+            )}
+          >
+            <span
               className={cn(
-                "flex flex-col items-center gap-1 rounded-lg border px-3 py-2 text-xs transition-all",
-                isActive
-                  ? status === "done"
-                    ? "border-green-500 bg-green-50 text-green-700 scale-105"
-                    : "border-blue-500 bg-blue-50 text-blue-700 scale-105 animate-pulse"
-                  : "border-border bg-background text-muted-foreground opacity-50",
+                "h-2 w-2 rounded-full",
+                isActive ? a.color : "bg-border",
+                isRunning && "animate-pulse",
               )}
-            >
-              <span className="font-medium">{a.label}</span>
-              <span className="text-[10px]">{a.tool}</span>
-            </div>
-          );
-        })}
-      </div>
+            />
+            <span className="font-medium">{a.label}</span>
+            <span className="hidden text-xs text-muted-foreground sm:inline">{a.tool}</span>
+          </div>
+        );
+      })}
     </div>
   );
 }

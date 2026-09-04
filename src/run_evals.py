@@ -1,4 +1,4 @@
-"""Run all eval_cases through the crew and record pass/fail.
+"""Run the claims pipeline against the Langfuse eval dataset and score results.
 
 Usage: uv run python -m src.run_evals [run_label]
 """
@@ -11,28 +11,45 @@ from dotenv import load_dotenv
 load_dotenv()
 os.environ.setdefault("CREWAI_DISABLE_TELEMETRY", "true")
 
-from src.agents import route  # noqa: E402
+from src.agents import run_claim  # noqa: E402
 from src.db import get_conn, init_db  # noqa: E402
-from src.tracing import setup_tracing  # noqa: E402
+from src.seed_evals import DATASET_NAME  # noqa: E402
+from src.tracing import langfuse, score_decision, setup_tracing  # noqa: E402
 
 
 def run_evals(run_label: str = "manual"):
     setup_tracing()
     init_db()
+    dataset = langfuse.get_dataset(DATASET_NAME)
 
     with get_conn() as conn:
-        cases = conn.execute("SELECT * FROM eval_cases").fetchall()
+        for item in dataset.items:
+            conn.execute(
+                "INSERT OR REPLACE INTO eval_cases (id, claim_id, expected_decision) VALUES (?, ?, ?)",
+                (item.id, item.input["claim_id"], item.expected_output["decision"]),
+            )
 
-    for case in cases:
-        actual_agent = route(case["prompt"])
-        passed = actual_agent == case["expected_agent"]
+    for item in dataset.items:
+        claim = item.input
+        claim_id = claim["claim_id"]
+        expected = item.expected_output["decision"]
+
+        result = run_claim(claim_id, claim)
+        actual = result["decision"]
+        passed = actual == expected
+
+        score_decision(claim_id, passed)
+        trace_url = os.environ.get("LANGFUSE_HOST")
         with get_conn() as conn:
             conn.execute(
-                "INSERT INTO eval_results (case_id, run_label, actual_agent, passed) VALUES (?, ?, ?, ?)",
-                (case["id"], run_label, actual_agent, int(passed)),
+                """INSERT INTO eval_results
+                   (case_id, run_label, actual_decision, passed, trace_url)
+                   VALUES (?, ?, ?, ?, ?)""",
+                (item.id, run_label, actual, int(passed), trace_url),
             )
+
         status = "PASS" if passed else "FAIL"
-        print(f"[{status}] {case['id']}: expected={case['expected_agent']} actual={actual_agent}")
+        print(f"[{status}] {claim_id}: expected={expected} actual={actual} (run={run_label})")
 
 
 if __name__ == "__main__":

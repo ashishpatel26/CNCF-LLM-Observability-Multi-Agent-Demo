@@ -1,29 +1,40 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { IBM_Plex_Sans, IBM_Plex_Mono, Source_Serif_4 } from "next/font/google";
 import "./globals.css";
+import { AppShell } from "@/components/app-shell";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const plexSans = IBM_Plex_Sans({
+  variable: "--font-sans",
   subsets: ["latin"],
+  weight: ["400", "500", "600"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const plexMono = IBM_Plex_Mono({
+  variable: "--font-mono",
   subsets: ["latin"],
+  weight: ["400", "500"],
+});
+
+const sourceSerif = Source_Serif_4({
+  variable: "--font-serif",
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
 });
 
 export const metadata: Metadata = {
-  title: "Agents Studio",
-  description: "Multi-agent observability demo",
+  title: "Meridian Claims",
+  description: "Claims adjudication portal",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${plexSans.variable} ${plexMono.variable} ${sourceSerif.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full bg-background">
+        <AppShell>{children}</AppShell>
+      </body>
     </html>
   );
 }

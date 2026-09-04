@@ -1,107 +1,82 @@
-"use client";
-
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { AgentGraph } from "@/components/agent-graph";
-import { sendChat, type ChatResponse } from "@/lib/api";
 import Link from "next/link";
+import { listClaims } from "@/lib/api";
+import { StatusBadge } from "@/components/status-badge";
 
-type Message = {
-  role: "user" | "assistant";
-  text: string;
-  agent?: string;
-  traceUrl?: string | null;
-};
+function formatCurrency(n: number) {
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n);
+}
 
-export default function Home() {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState("");
-  const [status, setStatus] = useState<"idle" | "running" | "done">("idle");
-  const [activeAgent, setActiveAgent] = useState<string | null>(null);
+function formatDate(iso: string) {
+  return new Date(iso.replace(" ", "T") + "Z").toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
 
-  async function handleSend() {
-    if (!input.trim()) return;
-    const userMessage = input;
-    setInput("");
-    setMessages((m) => [...m, { role: "user", text: userMessage }]);
-    setStatus("running");
-
-    try {
-      const res: ChatResponse = await sendChat(userMessage);
-      setActiveAgent(res.agent);
-      setStatus("done");
-      setMessages((m) => [
-        ...m,
-        { role: "assistant", text: res.response, agent: res.agent, traceUrl: res.trace_url },
-      ]);
-    } catch {
-      setStatus("idle");
-      setMessages((m) => [...m, { role: "assistant", text: "Error: could not reach backend." }]);
-    }
-  }
+export default async function ClaimsQueue() {
+  const claims = await listClaims().catch(() => []);
 
   return (
-    <div className="mx-auto flex h-screen max-w-3xl flex-col gap-4 p-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Agents Studio</h1>
-        <Link href="/evals" className="text-sm text-muted-foreground underline">
-          Eval Dashboard →
+    <div className="mx-auto max-w-5xl px-8 py-10">
+      <div className="mb-8 flex items-end justify-between">
+        <div>
+          <h1 className="font-serif text-2xl font-semibold text-primary">Claims queue</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {claims.length} claim{claims.length === 1 ? "" : "s"} on file
+          </p>
+        </div>
+        <Link
+          href="/claims/new"
+          className="rounded-sm bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+        >
+          File a new claim
         </Link>
       </div>
 
-      <AgentGraph activeAgent={activeAgent} status={status} />
-
-      <Card className="flex-1 overflow-hidden p-0">
-        <ScrollArea className="h-full p-4">
-          <div className="flex flex-col gap-3">
-            {messages.length === 0 && (
-              <p className="text-sm text-muted-foreground">
-                Try: &quot;What&apos;s our refund policy?&quot;, &quot;Is checkout-service healthy?&quot;, &quot;Check
-                status of TICKET-101&quot;
-              </p>
-            )}
-            {messages.map((m, i) => (
-              <div
-                key={i}
-                className={m.role === "user" ? "self-end rounded-lg bg-primary px-3 py-2 text-sm text-primary-foreground" : "self-start rounded-lg bg-muted px-3 py-2 text-sm"}
-              >
-                <p>{m.text}</p>
-                {m.agent && (
-                  <div className="mt-2 flex items-center gap-2">
-                    <Badge variant="secondary">ran: {m.agent}</Badge>
-                    {m.traceUrl && (
-                      <a
-                        href={m.traceUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-xs text-blue-600 underline"
-                      >
-                        View trace ↗
-                      </a>
-                    )}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </ScrollArea>
-      </Card>
-
-      <div className="flex gap-2">
-        <Input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleSend()}
-          placeholder="Ask the agents..."
-        />
-        <Button onClick={handleSend} disabled={status === "running"}>
-          {status === "running" ? "Running..." : "Send"}
-        </Button>
-      </div>
+      {claims.length === 0 ? (
+        <div className="rounded-sm border border-border bg-card px-6 py-12 text-center">
+          <p className="text-sm text-muted-foreground">
+            No claims on file yet. File one to see the adjudication pipeline run.
+          </p>
+        </div>
+      ) : (
+        <div className="overflow-hidden rounded-sm border border-border bg-card">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border text-left text-xs text-muted-foreground">
+                <th className="px-4 py-3 font-medium">Claim</th>
+                <th className="px-4 py-3 font-medium">Patient</th>
+                <th className="px-4 py-3 font-medium">Provider</th>
+                <th className="px-4 py-3 font-medium">Procedure</th>
+                <th className="px-4 py-3 text-right font-medium">Billed</th>
+                <th className="px-4 py-3 font-medium">Status</th>
+                <th className="px-4 py-3 font-medium">Filed</th>
+              </tr>
+            </thead>
+            <tbody>
+              {claims.map((c) => (
+                <tr key={c.id} className="border-b border-border last:border-0 hover:bg-secondary/40">
+                  <td className="px-4 py-3">
+                    <Link href={`/claims/${c.id}`} className="font-mono text-xs font-medium text-primary hover:underline">
+                      {c.id}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-3">{c.patient_name ?? c.patient_id}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{c.provider_name ?? c.provider_id}</td>
+                  <td className="px-4 py-3 font-mono text-xs">{c.procedure_code}</td>
+                  <td className="px-4 py-3 text-right tabular-nums">{formatCurrency(c.billed_amount)}</td>
+                  <td className="px-4 py-3">
+                    <StatusBadge status={c.status === "done" ? c.decision : "processing"} />
+                  </td>
+                  <td className="px-4 py-3 text-muted-foreground">{formatDate(c.created_at)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

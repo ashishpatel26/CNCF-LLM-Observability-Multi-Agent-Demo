@@ -1,99 +1,166 @@
-from crewai import Agent, Crew, Process, Task
+from crewai import LLM, Agent, Crew, Process, Task
+from crewai.mcp import MCPServerStdio
+from langfuse import propagate_attributes
 
 from src.events import publish
 from src.llm import get_llm
-from src.tools.k8s_mock import k8s_status
-from src.tools.ticket_mock import ticket_lookup
-from src.tools.vector_search import vector_search
 
-llm = get_llm()
+_mcp = MCPServerStdio(command="uv", args=["run", "python", "-m", "src.mcp_server"])
 
-research_agent = Agent(
-    role="Research Agent",
-    goal="Answer questions using the internal knowledge base",
-    backstory="You search internal docs and summarize what's relevant to the user's question.",
-    tools=[vector_search],
-    llm=llm,
-)
+llm: LLM = get_llm()
 
-infra_agent = Agent(
-    role="Infra Agent",
-    goal="Check deployment/cluster health when asked about services or infrastructure",
+policy_agent = Agent(
+    role="Policy Verification Agent",
+    goal="Determine whether the billed procedure is covered under the patient's policy",
     backstory=(
-        "You NEVER know deployment status from memory — you have no access to the "
-        "cluster except through the k8s_status tool. You MUST call k8s_status with "
-        "the deployment name before answering. Never invent status/replicas/restarts."
+        "You NEVER know coverage details from memory — you have no access to policy data "
+        "except through the check_coverage tool. You MUST call it with the claim's policy_id "
+        "and procedure_code before answering. Report coverage status, deductible status, and "
+        "any exclusion, quoting the tool's output — never invent or paraphrase it."
     ),
-    tools=[k8s_status],
+    mcps=[_mcp],
     llm=llm,
 )
 
-support_agent = Agent(
-    role="Support Agent",
-    goal="Look up support tickets when asked about customer issues",
+medical_history_agent = Agent(
+    role="Medical History Agent",
+    goal="Check whether the claim is consistent with the patient's medical history",
     backstory=(
-        "You NEVER know ticket details from memory — you have no access to the "
-        "ticketing system except through the ticket_lookup tool. You MUST call "
-        "ticket_lookup with the ticket ID before answering. Never invent ticket details."
+        "You NEVER know a patient's history from memory — you have no access except through "
+        "the lookup_medical_history tool. You MUST call it with the claim's patient_id before "
+        "answering. Report whether the procedure is consistent with prior diagnoses/procedures, "
+        "quoting the tool's output — never invent or paraphrase it."
     ),
-    tools=[ticket_lookup],
+    mcps=[_mcp],
     llm=llm,
 )
 
-_AGENTS = {
-    "research": research_agent,
-    "infra": infra_agent,
-    "support": support_agent,
-}
+fraud_agent = Agent(
+    role="Fraud/Exception Agent",
+    goal="Assess fraud risk for the claim based on billing and prior-claim signals",
+    backstory=(
+        "You NEVER know fraud signals from memory — you have no access except through the "
+        "fraud_score tool. You MUST call it with the claim's claim_id before answering. Report "
+        "the billed-vs-typical-cost ratio and prior-claim flags, quoting the tool's output — "
+        "never invent or paraphrase it."
+    ),
+    mcps=[_mcp],
+    llm=llm,
+)
 
 
-def route(user_request: str) -> str:
-    """Supervisor step: pick which specialist agent should handle the request.
-
-    Kept as plain keyword matching rather than an LLM call — free-tier models
-    were unreliable at forced delegation (see PRD Slide-2 "HTTP 200 != correct"
-    lesson: a model can look confident while skipping the tool it should use).
-    A deterministic router keeps the demo's multi-agent story reliable on stage.
-    """
-    lowered = user_request.lower()
-    if any(w in lowered for w in ("ticket", "customer", "support")):
-        return "support"
-    if any(w in lowered for w in ("deploy", "service", "cluster", "pod", "k8s", "kubernetes", "infra")):
-        return "infra"
-    return "research"
+def _decision_gate(coverage: dict, history_conflict: bool, fraud: dict) -> tuple[str, str]:
+    """Deterministic — the decision that pays or denies money should not depend on
+    an LLM's phrasing that day. Agents produce findings; this applies the policy."""
+    if not coverage.get("covered", False):
+        reason = coverage.get("exclusion") or "procedure not covered under policy"
+        return "denied", f"Coverage denied: {reason}"
+    if fraud.get("billed_vs_typical_ratio", 1.0) >= 3.0 or fraud.get("prior_claim_flags", 0) >= 2:
+        return "human_review", "Fraud signals above threshold — routed to adjuster"
+    if history_conflict:
+        return "human_review", "Medical history conflict — routed to adjuster"
+    return "approved", "Coverage confirmed, no fraud or history flags"
 
 
-def build_crew(user_request: str) -> tuple[Crew, str]:
-    """Supervisor routes to one specialist agent, which runs its task with its tool."""
-    agent_key = route(user_request)
-    agent = _AGENTS[agent_key]
-    task = Task(
-        description=(
-            f"Call your tool first, then answer using ONLY the tool's returned text "
-            f"(quote it, don't paraphrase or add details it doesn't contain). "
-            f"Request: {user_request}"
-        ),
-        expected_output="The tool's output, presented clearly to the user.",
-        agent=agent,
-    )
-    crew = Crew(
-        agents=[agent],
-        tasks=[task],
-        process=Process.sequential,
-        verbose=True,
-    )
-    return crew, agent_key
+def _step(claim_id: str, agent: str, note: str):
+    """Publishes a micro-progress annotation (for live SSE) and persists it
+    (so the pipeline console still renders after the claim is done — a page
+    reload shouldn't lose the record of what the agents did)."""
+    publish(claim_id, {"type": "step", "agent": agent, "note": note})
+
+    from src.db import get_conn
+
+    with get_conn() as conn:
+        conn.execute(
+            "INSERT INTO claim_activity (claim_id, agent, note) VALUES (?, ?, ?)",
+            (claim_id, agent, note),
+        )
 
 
-def run_request(run_id: str, user_request: str) -> dict:
-    """Run the crew for a request, publishing step events for SSE as it goes."""
-    agent_key = route(user_request)
-    publish(run_id, {"type": "routed", "agent": agent_key})
+def run_claim(claim_id: str, claim: dict) -> dict:
+    """Runs the sequential claims pipeline for one claim, publishing SSE events
+    and grouping all spans under one Langfuse session (session_id=claim_id,
+    user_id=patient_id) so the whole pipeline is reviewable as one unit."""
+    publish(claim_id, {"type": "stage", "agent": "policy", "status": "running"})
+    _step(claim_id, "policy", "Reading claim details")
 
-    crew, _ = build_crew(user_request)
-    publish(run_id, {"type": "agent_started", "agent": agent_key})
+    with propagate_attributes(session_id=claim_id, user_id=claim["patient_id"]):
+        _step(claim_id, "policy", "Calling check_coverage via MCP")
+        policy_task = Task(
+            description=(
+                f"Check coverage for policy_id={claim['policy_id']}, "
+                f"procedure_code={claim['procedure_code']}."
+            ),
+            expected_output="Coverage status, deductible status, exclusion (if any).",
+            agent=policy_agent,
+        )
+        policy_result = Crew(
+            agents=[policy_agent], tasks=[policy_task], process=Process.sequential, verbose=True
+        ).kickoff()
+        _step(claim_id, "policy", "Coverage finding recorded")
+        publish(claim_id, {"type": "stage", "agent": "policy", "status": "done"})
 
-    result = crew.kickoff()
+        publish(claim_id, {"type": "stage", "agent": "medical_history", "status": "running"})
+        _step(claim_id, "medical_history", "Calling lookup_medical_history via MCP")
+        history_task = Task(
+            description=(
+                f"Check medical history for patient_id={claim['patient_id']}. "
+                f"This claim is for procedure_code={claim['procedure_code']} — "
+                f"assess consistency against that specific procedure, not any other "
+                f"procedure that happens to appear in the patient's history."
+            ),
+            expected_output="Prior diagnoses/procedures and whether they're consistent with this claim's procedure.",
+            agent=medical_history_agent,
+        )
+        history_result = Crew(
+            agents=[medical_history_agent],
+            tasks=[history_task],
+            process=Process.sequential,
+            verbose=True,
+        ).kickoff()
+        _step(claim_id, "medical_history", "Consistency check recorded")
+        publish(claim_id, {"type": "stage", "agent": "medical_history", "status": "done"})
 
-    publish(run_id, {"type": "agent_finished", "agent": agent_key})
-    return {"agent": agent_key, "response": str(result)}
+        publish(claim_id, {"type": "stage", "agent": "fraud", "status": "running"})
+        _step(claim_id, "fraud", "Calling fraud_score via MCP")
+        fraud_task = Task(
+            description=f"Get fraud signals for claim_id={claim_id}.",
+            expected_output="Billed-vs-typical ratio and prior-claim flags.",
+            agent=fraud_agent,
+        )
+        fraud_result = Crew(
+            agents=[fraud_agent], tasks=[fraud_task], process=Process.sequential, verbose=True
+        ).kickoff()
+        _step(claim_id, "fraud", "Fraud signal recorded")
+        publish(claim_id, {"type": "stage", "agent": "fraud", "status": "done"})
+
+    from src.mcp_server import check_coverage, fraud_score, lookup_medical_history
+    from src.tracing import judge_groundedness
+
+    _step(claim_id, "decision", "Applying decision policy")
+    coverage = check_coverage(claim["policy_id"], claim["procedure_code"])
+    history = lookup_medical_history(claim["patient_id"])
+    fraud = fraud_score(claim_id)
+    history_conflict = "conflict" in str(history_result).lower()
+    decision, reason = _decision_gate(coverage, history_conflict, fraud)
+
+    publish(claim_id, {"type": "decision", "decision": decision, "reason": reason})
+
+    _step(claim_id, "policy", "Scoring groundedness")
+    judge_groundedness(claim_id, str(coverage), str(policy_result))
+    _step(claim_id, "medical_history", "Scoring groundedness")
+    judge_groundedness(claim_id, str(history), str(history_result))
+    _step(claim_id, "fraud", "Scoring groundedness")
+    judge_groundedness(claim_id, str(fraud), str(fraud_result))
+
+    publish(claim_id, {"type": "done"})
+
+    return {
+        "findings": {
+            "policy": str(policy_result),
+            "medical_history": str(history_result),
+            "fraud": str(fraud_result),
+        },
+        "decision": decision,
+        "decision_reason": reason,
+    }

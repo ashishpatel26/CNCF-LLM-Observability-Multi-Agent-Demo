@@ -5,27 +5,49 @@ from pathlib import Path
 DB_PATH = Path(__file__).parent.parent / "studio.db"
 
 _SCHEMA = """
-CREATE TABLE IF NOT EXISTS runs (
+CREATE TABLE IF NOT EXISTS claims (
     id TEXT PRIMARY KEY,
-    request TEXT NOT NULL,
+    patient_id TEXT NOT NULL,
+    policy_id TEXT NOT NULL,
+    provider_id TEXT NOT NULL,
+    procedure_code TEXT NOT NULL,
+    billed_amount REAL NOT NULL,
+    status TEXT NOT NULL DEFAULT 'processing',
+    decision TEXT,
+    decision_reason TEXT,
+    langfuse_session_url TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS claim_findings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    claim_id TEXT NOT NULL,
     agent TEXT NOT NULL,
-    response TEXT,
-    status TEXT NOT NULL DEFAULT 'running',
+    finding TEXT NOT NULL,
     trace_url TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (claim_id) REFERENCES claims(id)
+);
+
+CREATE TABLE IF NOT EXISTS claim_activity (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    claim_id TEXT NOT NULL,
+    agent TEXT NOT NULL,
+    note TEXT NOT NULL,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
 CREATE TABLE IF NOT EXISTS eval_cases (
     id TEXT PRIMARY KEY,
-    prompt TEXT NOT NULL,
-    expected_agent TEXT NOT NULL
+    claim_id TEXT NOT NULL,
+    expected_decision TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS eval_results (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     case_id TEXT NOT NULL,
     run_label TEXT NOT NULL,
-    actual_agent TEXT,
+    actual_decision TEXT,
     passed INTEGER NOT NULL,
     trace_url TEXT,
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
