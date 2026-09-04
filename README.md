@@ -1,8 +1,10 @@
 # Meridian Claims — Multi-Agent LLM Observability Demo
 
-**A real, running health-insurance claims-adjudication system built to demonstrate what production-grade multi-agent observability actually looks like — not a toy example.** Three CrewAI agents (Policy Verification, Medical History, Fraud/Exception) call tools through MCP, a deterministic decision gate approves/denies/routes each claim, and every step — every LLM call, every tool call, every score — is traced live in Langfuse Cloud. No mocks pretending to be a product, no Docker required. Full design/rationale: [PRD.md](PRD.md). Speaker script for the companion conference talk: [presentation/SPEAKER_SCRIPT.md](presentation/SPEAKER_SCRIPT.md).
+**A real, running health-insurance claims-adjudication system built to demonstrate what production-grade multi-agent observability actually looks like — not a toy example.** Three CrewAI agents (Policy Verification, Medical History, Fraud/Exception) call tools through MCP, a deterministic decision gate approves/denies/routes each claim, and every step — every LLM call, every tool call, every score — is traced live in Langfuse Cloud. No mocks pretending to be a product, no Docker required. Full design/rationale: [PRD.md](PRD.md).
 
 **Topics:** `llm-observability` `multi-agent-systems` `ai-agents` `crewai` `langfuse` `mcp` `model-context-protocol` `fastapi` `nextjs` `llmops` `agentic-ai` `enterprise-ai` `python` `typescript`
+
+![Meridian Claims system architecture](review/meridian-architecture.visual-check.1440x900.light.png)
 
 ## Architecture
 
