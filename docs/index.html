@@ -9,6 +9,8 @@
   @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
   :root{
+    --stage:#0B1D2E;
+    --stage-2:#132C42;
     --ink:#0F2438;
     --navy:#1B3A5C;
     --paper:#F7F5F0;
@@ -17,6 +19,7 @@
     --muted:#6B6558;
     --clay:#B4562B;
     --green:#2E7D5B;
+    --glow:#5FA8D3;
     --serif:"Source Serif 4", Georgia, "Times New Roman", serif;
     --sans:"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     --mono:"IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
@@ -31,233 +34,275 @@
     font-family:var(--sans);
     line-height:1.55;
     -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
   }
   a{color:var(--navy)}
-  a:focus-visible, button:focus-visible{outline:2px solid var(--navy); outline-offset:2px}
+  a:focus-visible, button:focus-visible{outline:2px solid var(--glow); outline-offset:2px; border-radius:2px}
 
   .wrap{max-width:760px; margin:0 auto; padding:0 24px}
-  .wide{max-width:1040px; margin:0 auto; padding:0 24px}
+  .wide{max-width:1100px; margin:0 auto; padding:0 24px}
 
-  /* nav */
-  nav.top{
-    border-bottom:1px solid var(--line);
-    padding:20px 0;
+  /* ---------- hero stage (dark navy band) ---------- */
+  .stage{
+    position:relative;
+    background:
+      radial-gradient(ellipse 900px 500px at 12% -10%, rgba(95,168,211,0.16), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 100% 0%, rgba(46,125,91,0.10), transparent 55%),
+      linear-gradient(180deg, var(--stage) 0%, var(--stage-2) 100%);
+    color:var(--paper);
+    overflow:hidden;
   }
-  nav.top .wide{display:flex; align-items:baseline; justify-content:space-between; gap:24px; flex-wrap:wrap}
+
+  nav.top{ position:relative; z-index:2; padding:26px 0 }
+  nav.top .wide{display:flex; align-items:center; justify-content:space-between; gap:24px; flex-wrap:wrap}
   .wordmark{
+    display:flex; align-items:center; gap:9px;
     font-family:var(--serif);
     font-weight:600;
     font-size:1.15rem;
     letter-spacing:0.01em;
-    color:var(--navy);
+    color:var(--paper);
     text-decoration:none;
   }
-  .navlinks{display:flex; gap:28px; font-size:0.92rem}
-  .navlinks a{text-decoration:none; color:var(--ink); border-bottom:1px solid transparent}
-  .navlinks a:hover{border-bottom-color:var(--ink)}
+  .wordmark .dot{width:7px; height:7px; border-radius:50%; background:var(--glow); box-shadow:0 0 0 4px rgba(95,168,211,0.18)}
+  .navlinks{display:flex; gap:26px; font-size:0.9rem}
+  .navlinks a{text-decoration:none; color:rgba(247,245,240,0.72); border-bottom:1px solid transparent; transition:color .15s ease, border-color .15s ease}
+  .navlinks a:hover{color:var(--paper); border-color:rgba(247,245,240,0.4)}
 
-  /* hero */
-  header.hero{padding:72px 0 56px}
+  header.hero{
+    position:relative; z-index:2;
+    padding:64px 0 0;
+    max-width:1100px; margin:0 auto; padding-left:24px; padding-right:24px;
+  }
   .kicker{
     font-family:var(--mono);
-    font-size:0.8rem;
-    color:var(--muted);
-    margin:0 0 18px;
+    font-size:0.78rem;
+    letter-spacing:0.01em;
+    color:var(--glow);
+    margin:0 0 20px;
+    max-width:60ch;
   }
   h1{
     font-family:var(--serif);
     font-weight:600;
-    font-size:2.5rem;
-    line-height:1.16;
-    letter-spacing:-0.01em;
-    margin:0 0 22px;
-    color:var(--ink);
-    max-width:15ch;
+    font-size:clamp(2.4rem, 5vw, 3.75rem);
+    line-height:1.08;
+    letter-spacing:-0.015em;
+    margin:0 0 26px;
+    color:var(--paper);
+    max-width:17ch;
   }
   .lede{
-    font-size:1.15rem;
-    line-height:1.6;
-    color:#2A3B4D;
-    max-width:56ch;
-    margin:0 0 32px;
+    font-size:1.18rem;
+    line-height:1.62;
+    color:rgba(247,245,240,0.82);
+    max-width:58ch;
+    margin:0 0 36px;
   }
-  .lede strong{color:var(--ink)}
-  .cta-row{display:flex; gap:14px; flex-wrap:wrap}
+  .lede strong{color:var(--paper); font-weight:600}
+  .cta-row{display:flex; gap:14px; flex-wrap:wrap; margin-bottom:64px}
   .btn{
     display:inline-flex;
     align-items:center;
     gap:8px;
-    padding:11px 20px;
+    padding:12px 22px;
     font-family:var(--sans);
     font-size:0.94rem;
     font-weight:500;
     text-decoration:none;
-    border-radius:3px;
+    border-radius:4px;
     border:1px solid transparent;
+    transition:transform .15s ease, background .15s ease, border-color .15s ease;
   }
-  .btn-primary{background:var(--navy); color:var(--paper)}
-  .btn-primary:hover{background:#152e49}
-  .btn-secondary{background:transparent; color:var(--navy); border-color:var(--navy)}
-  .btn-secondary:hover{background:rgba(27,58,92,0.06)}
+  .btn-primary{background:var(--glow); color:var(--stage)}
+  .btn-primary:hover{background:#7ebbe0; transform:translateY(-1px)}
+  .btn-secondary{background:rgba(247,245,240,0.06); color:var(--paper); border-color:rgba(247,245,240,0.28)}
+  .btn-secondary:hover{background:rgba(247,245,240,0.12); border-color:rgba(247,245,240,0.5)}
 
-  /* diagram */
-  figure.diagram{margin:0 0 80px}
+  /* diagram — floats as a card breaking out of the dark stage */
+  .diagram-dock{ position:relative; z-index:2; max-width:1100px; margin:0 auto; padding:0 24px 80px }
+  figure.diagram{margin:0}
+  figure.diagram a{display:block; border-radius:8px; overflow:hidden; box-shadow:0 24px 64px -20px rgba(11,29,46,0.55), 0 2px 0 rgba(255,255,255,0.06) inset}
   figure.diagram img{
     width:100%;
     display:block;
-    border:1px solid var(--line);
-    border-radius:4px;
     background:#fff;
+    transition:transform .35s ease;
   }
+  figure.diagram a:hover img{transform:scale(1.012)}
   figcaption{
     font-size:0.85rem;
-    color:var(--muted);
-    margin-top:10px;
+    color:rgba(247,245,240,0.6);
+    margin-top:16px;
     font-family:var(--mono);
   }
+  figcaption a{color:var(--glow)}
 
-  /* section rhythm */
-  section{padding:0 0 72px}
+  /* ---------- paper sections ---------- */
+  section{padding:88px 0}
+  section + section{padding-top:0}
   section h2{
     font-family:var(--serif);
-    font-size:1.7rem;
+    font-size:clamp(1.5rem, 2.6vw, 1.85rem);
     font-weight:600;
-    margin:0 0 28px;
+    margin:0 0 16px;
     color:var(--ink);
+    max-width:22ch;
   }
-  section p{max-width:66ch; color:#2A3B4D}
+  section > .wrap > p{max-width:62ch; color:#3A4A5A; margin:0 0 40px}
 
-  /* pipeline */
-  .pipeline{list-style:none; margin:0; padding:0; border-top:1px solid var(--line)}
+  /* pipeline — horizontal connected flow on desktop */
+  .pipeline{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:0; position:relative}
   .pipeline li{
     display:grid;
-    grid-template-columns:40px 1fr;
-    gap:18px;
-    padding:22px 0;
-    border-bottom:1px solid var(--line);
+    grid-template-columns:52px 1fr;
+    gap:20px;
+    padding:26px 0;
+    border-top:1px solid var(--line);
+    position:relative;
   }
+  .pipeline li:last-child{border-bottom:1px solid var(--line)}
   .pipeline .num{
     font-family:var(--serif);
-    font-size:1.3rem;
-    color:var(--muted);
+    font-size:1.5rem;
     font-weight:500;
+    color:var(--muted);
+    display:flex; align-items:flex-start;
   }
+  .pipeline .gate .num{color:var(--glow)}
   .pipeline h3{
     font-family:var(--sans);
-    font-size:1.02rem;
+    font-size:1.05rem;
     font-weight:600;
-    margin:0 0 6px;
+    margin:0 0 7px;
     color:var(--ink);
   }
-  .pipeline p{margin:0; font-size:0.96rem}
+  .pipeline p{margin:0; font-size:0.97rem; color:#3A4A5A; max-width:60ch}
   .pipeline code{
     font-family:var(--mono);
     font-size:0.85em;
     background:#EEECE4;
-    padding:1px 5px;
-    border-radius:2px;
+    padding:1px 6px;
+    border-radius:3px;
+    color:var(--ink);
   }
+  .pipeline .gate{background:linear-gradient(90deg, rgba(27,58,92,0.04), transparent 60%)}
   .pipeline .gate h3{color:var(--navy)}
 
-  /* observability */
+  /* observability — thin accent-bar cards, no shadow-box kit */
   .obs-grid{
     display:grid;
     grid-template-columns:1fr 1fr;
-    gap:1px;
+    gap:2px;
     background:var(--line);
-    border:1px solid var(--line);
-    border-radius:4px;
+    border-radius:8px;
     overflow:hidden;
   }
-  .obs-cell{background:var(--paper-card); padding:22px}
+  .obs-cell{
+    background:var(--paper-card);
+    padding:26px 26px 26px 24px;
+    border-left:3px solid var(--line);
+    transition:border-color .2s ease, background .2s ease;
+  }
+  .obs-cell:hover{border-left-color:var(--glow); background:#FDFCFA}
   .obs-cell h3{
     font-family:var(--sans);
-    font-size:0.95rem;
+    font-size:0.97rem;
     font-weight:600;
-    margin:0 0 8px;
+    margin:0 0 9px;
     color:var(--navy);
   }
-  .obs-cell p{margin:0; font-size:0.92rem; max-width:none}
+  .obs-cell p{margin:0; font-size:0.93rem; color:#3A4A5A; max-width:none}
 
-  /* stack */
-  .stack-table{width:100%; border-collapse:collapse; font-size:0.94rem}
-  .stack-table tr{border-bottom:1px solid var(--line)}
-  .stack-table tr:first-child{border-top:1px solid var(--line)}
-  .stack-table td{padding:14px 0; vertical-align:top}
-  .stack-table td.layer{
-    width:160px;
+  /* stack — inline tag groups, not a table */
+  .stack-list{display:flex; flex-direction:column; gap:22px}
+  .stack-row{display:grid; grid-template-columns:150px 1fr; gap:20px; align-items:baseline}
+  .stack-row .layer{
     font-family:var(--mono);
-    font-size:0.82rem;
+    font-size:0.78rem;
+    letter-spacing:0.02em;
     color:var(--muted);
-    padding-top:16px;
+    padding-top:4px;
   }
-  .stack-table td.detail{color:#2A3B4D}
-  .stack-table code{font-family:var(--mono); font-size:0.9em; color:var(--ink)}
+  .stack-row .detail{font-size:0.96rem; color:#3A4A5A; line-height:1.6}
+  .stack-row code{
+    font-family:var(--mono); font-size:0.86em; color:var(--navy);
+    background:#EEECE4; padding:1px 6px; border-radius:3px;
+  }
 
-  /* footer */
+  /* ---------- footer stage (matches hero) ---------- */
   footer{
-    border-top:1px solid var(--line);
-    padding:36px 0 60px;
+    background:var(--stage);
+    color:rgba(247,245,240,0.7);
+    padding:44px 0;
   }
   footer .wide{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px}
-  footer p{margin:0; font-size:0.86rem; color:var(--muted)}
-  footer .navlinks a{color:var(--muted)}
+  footer p{margin:0; font-size:0.86rem}
+  footer .navlinks a{color:rgba(247,245,240,0.7)}
+  footer .navlinks a:hover{color:var(--paper)}
 
-  @media (max-width:640px){
-    h1{font-size:1.9rem}
+  @media (max-width:760px){
+    header.hero{padding-top:48px}
+    .cta-row{margin-bottom:48px}
     .obs-grid{grid-template-columns:1fr}
-    .pipeline li{grid-template-columns:28px 1fr}
-    .stack-table td.layer{width:110px}
+    .pipeline li{grid-template-columns:32px 1fr}
+    .stack-row{grid-template-columns:1fr; gap:6px}
+    section{padding:64px 0}
+    nav.top .wide{gap:12px 20px}
+    .navlinks{gap:16px 20px; flex-wrap:wrap; font-size:0.86rem}
+    .kicker{font-size:0.72rem}
   }
 
 </style>
 </head>
 <body>
 
-<nav class="top">
-  <div class="wide">
-    <a class="wordmark" href="#top">Meridian Claims</a>
-    <div class="navlinks">
-      <a href="architecture.html">Architecture</a>
-      <a href="presentation.html">Presentation</a>
-      <a href="https://github.com/ashishpatel26/CNCF-LLM-Observability-Multi-Agent-Demo" target="_blank" rel="noreferrer">Code</a>
-      <a href="https://github.com/ashishpatel26/CNCF-LLM-Observability-Multi-Agent-Demo/blob/main/PRD.md" target="_blank" rel="noreferrer">PRD</a>
-      <a href="https://github.com/ashishpatel26/CNCF-LLM-Observability-Multi-Agent-Demo/blob/main/presentation/SPEAKER_SCRIPT.md" target="_blank" rel="noreferrer">Talk script</a>
+<div class="stage">
+  <nav class="top">
+    <div class="wide">
+      <a class="wordmark" href="#top"><span class="dot"></span>Meridian Claims</a>
+      <div class="navlinks">
+        <a href="architecture.html">Architecture</a>
+        <a href="presentation.html">Presentation</a>
+        <a href="https://github.com/ashishpatel26/CNCF-LLM-Observability-Multi-Agent-Demo" target="_blank" rel="noreferrer">Code</a>
+        <a href="https://github.com/ashishpatel26/CNCF-LLM-Observability-Multi-Agent-Demo/blob/main/PRD.md" target="_blank" rel="noreferrer">PRD</a>
+        <a href="https://github.com/ashishpatel26/CNCF-LLM-Observability-Multi-Agent-Demo/blob/main/presentation/SPEAKER_SCRIPT.md" target="_blank" rel="noreferrer">Talk script</a>
+      </div>
     </div>
+  </nav>
+
+  <div id="top">
+    <header class="hero">
+      <p class="kicker stage-in d1">Use Observability — the critical importance of LLM observability in enterprise AI agents</p>
+      <h1 class="stage-in d2">A claims system three AI agents actually run, traced end to end</h1>
+      <p class="lede stage-in d3">
+        Meridian Claims is a real, running health-insurance claims-adjudication demo —
+        not slides pretending to be a product. Three CrewAI agents check policy coverage,
+        medical history, and fraud signals through MCP tools; a deterministic gate makes
+        the final call; and <strong>every LLM call, every tool call, every score is traced
+        live in Langfuse Cloud.</strong>
+      </p>
+      <div class="cta-row stage-in d4">
+        <a class="btn btn-primary" href="presentation.html">Open the presentation</a>
+        <a class="btn btn-secondary" href="https://github.com/ashishpatel26/CNCF-LLM-Observability-Multi-Agent-Demo" target="_blank" rel="noreferrer">View the code</a>
+      </div>
+    </header>
   </div>
-</nav>
 
-<div id="top" class="wrap">
-  <header class="hero">
-    <p class="kicker">Use Observability — the critical importance of LLM observability in enterprise AI agents</p>
-    <h1>A claims system three AI agents actually run, traced end to end</h1>
-    <p class="lede">
-      Meridian Claims is a real, running health-insurance claims-adjudication demo —
-      not slides pretending to be a product. Three CrewAI agents check policy coverage,
-      medical history, and fraud signals through MCP tools; a deterministic gate makes
-      the final call; and <strong>every LLM call, every tool call, every score is traced
-      live in Langfuse Cloud.</strong>
-    </p>
-    <div class="cta-row">
-      <a class="btn btn-primary" href="presentation.html">Open the presentation</a>
-      <a class="btn btn-secondary" href="https://github.com/ashishpatel26/CNCF-LLM-Observability-Multi-Agent-Demo" target="_blank" rel="noreferrer">View the code</a>
-    </div>
-  </header>
-</div>
-
-<div class="wide">
-  <figure class="diagram">
-    <a href="architecture.html">
-      <img src="architecture.png" alt="Meridian Claims system architecture: portal to FastAPI backend to the CrewAI agent pipeline (Policy Verification, Medical History, Fraud/Exception, Decision Gate), MCP server, Ollama/OpenRouter, and Langfuse Cloud">
-    </a>
-    <figcaption>System architecture — generated and validated from the actual codebase, not hand-drawn. <a href="architecture.html">Open the interactive version →</a></figcaption>
-  </figure>
+  <div class="diagram-dock stage-in d4">
+    <figure class="diagram">
+      <a href="architecture.html">
+        <img src="architecture.png" alt="Meridian Claims system architecture: portal to FastAPI backend to the CrewAI agent pipeline (Policy Verification, Medical History, Fraud/Exception, Decision Gate), MCP server, Ollama/OpenRouter, and Langfuse Cloud">
+      </a>
+      <figcaption>System architecture — generated and validated from the actual codebase, not hand-drawn. <a href="architecture.html">Open the interactive version →</a></figcaption>
+    </figure>
+  </div>
 </div>
 
 <div class="wrap">
   <section id="pipeline">
     <h2>What it actually does</h2>
-    <p style="margin-bottom:28px">
+    <p>
       A filed claim moves through three specialist agents in sequence. Each one calls exactly
       one tool through MCP, and none of them makes the final decision.
     </p>
@@ -299,7 +344,7 @@
 
   <section id="observability">
     <h2>Where Langfuse actually earns its place</h2>
-    <p style="margin-bottom:28px">
+    <p>
       Not just tracing — the parts of Langfuse most demos skip.
     </p>
     <div class="obs-grid">
@@ -329,32 +374,32 @@
 
   <section id="stack">
     <h2>Stack</h2>
-    <table class="stack-table">
-      <tr>
-        <td class="layer">Agents</td>
-        <td class="detail">CrewAI, sequential process — <code>src/agents.py</code></td>
-      </tr>
-      <tr>
-        <td class="layer">Tools</td>
-        <td class="detail">A local MCP server (stdio) exposing <code>check_coverage</code>, <code>lookup_medical_history</code>, <code>fraud_score</code></td>
-      </tr>
-      <tr>
-        <td class="layer">LLM</td>
-        <td class="detail">Ollama (<code>qwen2.5:7b</code>, local, primary) — OpenRouter free tier as fallback</td>
-      </tr>
-      <tr>
-        <td class="layer">Observability</td>
-        <td class="detail">Langfuse Cloud via OpenInference/OTel — Tracing, Sessions, Users, Datasets, Scores</td>
-      </tr>
-      <tr>
-        <td class="layer">Backend</td>
-        <td class="detail">FastAPI + SQLite, Server-Sent Events for live agent activity</td>
-      </tr>
-      <tr>
-        <td class="layer">Frontend</td>
-        <td class="detail">Next.js + shadcn/ui — a claims-ops portal, not a chat window</td>
-      </tr>
-    </table>
+    <div class="stack-list">
+      <div class="stack-row">
+        <div class="layer">Agents</div>
+        <div class="detail">CrewAI, sequential process — <code>src/agents.py</code></div>
+      </div>
+      <div class="stack-row">
+        <div class="layer">Tools</div>
+        <div class="detail">A local MCP server (stdio) exposing <code>check_coverage</code>, <code>lookup_medical_history</code>, <code>fraud_score</code></div>
+      </div>
+      <div class="stack-row">
+        <div class="layer">LLM</div>
+        <div class="detail">Ollama (<code>qwen2.5:7b</code>, local, primary) — OpenRouter free tier as fallback</div>
+      </div>
+      <div class="stack-row">
+        <div class="layer">Observability</div>
+        <div class="detail">Langfuse Cloud via OpenInference/OTel — Tracing, Sessions, Users, Datasets, Scores</div>
+      </div>
+      <div class="stack-row">
+        <div class="layer">Backend</div>
+        <div class="detail">FastAPI + SQLite, Server-Sent Events for live agent activity</div>
+      </div>
+      <div class="stack-row">
+        <div class="layer">Frontend</div>
+        <div class="detail">Next.js + shadcn/ui — a claims-ops portal, not a chat window</div>
+      </div>
+    </div>
   </section>
 </div>
 
