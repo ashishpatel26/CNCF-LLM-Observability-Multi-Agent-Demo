@@ -66,6 +66,7 @@ export type EvalResult = {
 
 export async function listClaims(): Promise<Claim[]> {
   const res = await fetch(`${API_BASE}/claims`, { cache: "no-store" });
+  if (!res.ok) throw new Error(`Failed to load claims: ${res.status}`);
   return res.json();
 }
 
@@ -86,6 +87,7 @@ export async function submitClaim(input: NewClaimInput) {
 
 export async function listEvals(): Promise<{ cases: EvalCase[]; results: EvalResult[] }> {
   const res = await fetch(`${API_BASE}/evals`, { cache: "no-store" });
+  if (!res.ok) throw new Error(`Failed to load evals: ${res.status}`);
   return res.json();
 }
 
@@ -94,11 +96,13 @@ export type ReferenceProviders = Record<string, { name: string; npi: string }>;
 
 export async function listPatients(): Promise<ReferencePatients> {
   const res = await fetch(`${API_BASE}/reference/patients`, { cache: "no-store" });
+  if (!res.ok) throw new Error(`Failed to load patients: ${res.status}`);
   return res.json();
 }
 
 export async function listProviders(): Promise<ReferenceProviders> {
   const res = await fetch(`${API_BASE}/reference/providers`, { cache: "no-store" });
+  if (!res.ok) throw new Error(`Failed to load providers: ${res.status}`);
   return res.json();
 }
 

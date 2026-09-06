@@ -15,17 +15,18 @@ export default function EvalsPage() {
   const [cases, setCases] = useState<EvalCase[]>([]);
   const [results, setResults] = useState<EvalResult[]>([]);
   const [claims, setClaims] = useState<Claim[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
-    listEvals()
-      .then((d) => {
-        setCases(d.cases);
-        setResults(d.results);
+    Promise.all([listEvals(), listClaims()])
+      .then(([evalData, claimData]) => {
+        setCases(evalData.cases);
+        setResults(evalData.results);
+        setClaims(claimData);
       })
-      .catch(() => {});
-    listClaims()
-      .then(setClaims)
-      .catch(() => {});
+      .catch(() => setError(true))
+      .finally(() => setLoading(false));
   }, []);
 
   const latestByCase = new Map<string, EvalResult>();
@@ -66,8 +67,29 @@ export default function EvalsPage() {
   }
   const decisionTotal = decisionCounts.approved + decisionCounts.denied + decisionCounts.human_review;
 
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-8 sm:py-10">
+        <h1 className="font-serif text-2xl font-semibold text-primary">Eval dashboard</h1>
+        <p className="mt-6 text-sm text-muted-foreground">Loading…</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-8 sm:py-10">
+        <h1 className="font-serif text-2xl font-semibold text-primary">Eval dashboard</h1>
+        <div className="mt-6 rounded-sm border border-destructive/30 bg-destructive/5 px-6 py-12 text-center">
+          <p className="text-sm font-medium text-destructive">Could not load eval data.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Check that the API server is running, then reload.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="mx-auto max-w-6xl px-8 py-10">
+    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-8 sm:py-10">
       <h1 className="font-serif text-2xl font-semibold text-primary">Eval dashboard</h1>
       <p className="mt-1 text-sm text-muted-foreground">
         Live analytics across every claim the pipeline has processed, plus regression results
@@ -158,11 +180,12 @@ export default function EvalsPage() {
           {runs.length > 1 && (
             <div className="mt-5 border-t border-border pt-4">
               <p className="text-xs font-medium text-muted-foreground">Run history</p>
-              <div className="mt-3 flex items-end gap-2" style={{ height: 80 }}>
+              <div className="mt-3 flex items-end gap-2" style={{ height: 80 }} role="img" aria-label={runs.map((r) => `${r.label}: ${r.total ? Math.round((r.pass / r.total) * 100) : 0}% passing`).join(", ")}>
                 {runs.map((r) => {
                   const pct = r.total ? (r.pass / r.total) * 100 : 0;
                   return (
-                    <div key={r.label} className="flex flex-1 flex-col items-center gap-1">
+                    <div key={r.label} className="flex flex-1 flex-col items-center gap-1" aria-hidden="true">
+                      <span className="text-[10px] font-medium tabular-nums text-muted-foreground">{Math.round(pct)}%</span>
                       <div className="flex h-16 w-full items-end overflow-hidden rounded-sm bg-muted">
                         <div className={pct === 100 ? "w-full bg-approved" : "w-full bg-denied"} style={{ height: `${pct}%` }} />
                       </div>
@@ -236,7 +259,7 @@ export default function EvalsPage() {
       <div className="mt-8">
         <h2 className="text-sm font-medium text-muted-foreground">All claims ({totalClaims})</h2>
         <div className="mt-2 overflow-x-auto rounded-sm border border-border bg-card">
-          <table className="w-full text-sm">
+          <table className="w-full min-w-180 text-sm">
             <thead>
               <tr className="border-b border-border text-left text-xs text-muted-foreground">
                 <th className="px-4 py-3 font-medium">Claim</th>

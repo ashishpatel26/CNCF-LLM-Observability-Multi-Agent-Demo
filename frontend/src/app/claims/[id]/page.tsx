@@ -84,7 +84,7 @@ export default function ClaimDetailPage({ params }: { params: Promise<{ id: stri
 
   if (notFound) {
     return (
-      <div className="mx-auto max-w-2xl px-8 py-10">
+      <div className="mx-auto max-w-2xl px-4 py-8 sm:px-8 sm:py-10">
         <Link href="/" className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-3.5 w-3.5" />
           Claims queue
@@ -96,7 +96,7 @@ export default function ClaimDetailPage({ params }: { params: Promise<{ id: stri
 
   if (!claim) {
     return (
-      <div className="mx-auto max-w-2xl px-8 py-10">
+      <div className="mx-auto max-w-2xl px-4 py-8 sm:px-8 sm:py-10">
         <p className="text-sm text-muted-foreground">Loading claim…</p>
       </div>
     );
@@ -113,7 +113,7 @@ export default function ClaimDetailPage({ params }: { params: Promise<{ id: stri
     .sort((a, b) => a.time.getTime() - b.time.getTime());
 
   return (
-    <div className="mx-auto max-w-3xl px-8 py-10">
+    <div className="mx-auto max-w-3xl px-4 py-8 sm:px-8 sm:py-10">
       <Link href="/" className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
         <ArrowLeft className="h-3.5 w-3.5" />
         Claims queue

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { X } from "lucide-react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { recentActivity, subscribeGlobalActivity, type GlobalActivityEntry } from "@/lib/api";
 
 const AGENT_LABEL: Record<string, string> = {
@@ -17,12 +17,21 @@ function formatTime(iso: string | undefined) {
   return date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", second: "2-digit" });
 }
 
-export function ActivityDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function ActivityDrawer({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
   const [entries, setEntries] = useState<GlobalActivityEntry[]>([]);
+  const [error, setError] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    recentActivity(50).then(setEntries).catch(() => {});
+    recentActivity(50)
+      .then(setEntries)
+      .catch(() => setError(true));
     const unsubscribe = subscribeGlobalActivity((entry) => {
       setEntries((prev) => [
         ...prev.slice(-99),
@@ -37,25 +46,20 @@ export function ActivityDrawer({ open, onClose }: { open: boolean; onClose: () =
   }, [open, entries.length]);
 
   return (
-    <>
-      {open && <div className="fixed inset-0 z-40 bg-black/20" onClick={onClose} />}
-      <aside
-        className={`fixed top-0 right-0 z-50 h-screen w-96 transform border-l border-border bg-background shadow-xl transition-transform ${
-          open ? "translate-x-0" : "translate-x-full"
-        }`}
-      >
-        <div className="flex items-center justify-between border-b border-border px-5 py-4">
-          <div>
-            <h2 className="font-serif text-lg font-semibold text-primary">Activity</h2>
-            <p className="text-xs text-muted-foreground">Live across every claim</p>
-          </div>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
-            <X className="h-5 w-5" />
-          </button>
-        </div>
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="right" className="w-full max-w-96 p-0">
+        <SheetHeader className="border-b border-border px-5 py-4">
+          <SheetTitle className="font-serif text-lg font-semibold text-primary">Activity</SheetTitle>
+          <SheetDescription>Live across every claim</SheetDescription>
+        </SheetHeader>
 
-        <div ref={listRef} className="flex flex-col gap-3 overflow-y-auto px-5 py-4" style={{ height: "calc(100vh - 73px)" }}>
-          {entries.length === 0 && (
+        <div ref={listRef} className="flex flex-1 flex-col gap-3 overflow-y-auto px-5 py-4">
+          {error && (
+            <p className="text-sm text-destructive">
+              Could not load activity. Check that the API server is running.
+            </p>
+          )}
+          {!error && entries.length === 0 && (
             <p className="text-sm text-muted-foreground">No activity yet. File a claim to see the agents work.</p>
           )}
           {entries.map((e) => (
@@ -71,7 +75,7 @@ export function ActivityDrawer({ open, onClose }: { open: boolean; onClose: () =
             </div>
           ))}
         </div>
-      </aside>
-    </>
+      </SheetContent>
+    </Sheet>
   );
 }

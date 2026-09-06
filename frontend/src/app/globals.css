@@ -72,11 +72,11 @@
   --ring: #1b3a5c;
   --approved: #2e7d5b;
   --denied: #b4562b;
-  --review: #a8791f;
+  --review: #8a5f12;
   --chart-1: #1b3a5c;
   --chart-2: #2e7d5b;
   --chart-3: #b4562b;
-  --chart-4: #a8791f;
+  --chart-4: #8a5f12;
   --chart-5: #6b6558;
   --radius: 3px;
   --sidebar: #1b3a5c;
@@ -101,5 +101,16 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
