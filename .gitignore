@@ -25,3 +25,5 @@ frontend/.env.local
 # Playwright test artifacts
 .playwright-mcp/
 .claude/
+.agents/
+session_memory.json
